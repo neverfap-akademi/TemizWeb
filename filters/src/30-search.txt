@@ -1,0 +1,16 @@
+! Arama motorları — SafeSearch zorlamadan yüksek güvenli sonuç kartlarını gizler
+! Not: erotizm/cinsellik gibi eğitim ve haber bağlamı taşıyabilen tek kelimeler evrensel engellenmez.
+google.com,google.com.tr##div.MjjYud:has-text(/\b(Pornhub|OnlyFans|Fansly|GoneWild|Rule\s*34|Hentai|XXX|porn(?:ography)?|nudes?)\b/i)
+google.com,google.com.tr##div.MjjYud:has-text(/\b(porno(?:grafi|grafik|su)?|çıplak\s+(?:fotoğraf|video)|erotik\s+(?:video|fotoğraf)|seks\s+videosu|ifşa\s+(?:video|fotoğraf))\b/i)
+bing.com##li.b_algo:has-text(/\b(Pornhub|OnlyFans|Fansly|GoneWild|Rule\s*34|Hentai|XXX|porn(?:ography)?|nudes?)\b/i)
+duckduckgo.com##article[data-testid="result"]:has-text(/\b(Pornhub|OnlyFans|Fansly|GoneWild|Rule\s*34|Hentai|XXX|porn(?:ography)?|nudes?)\b/i)
+search.brave.com##div.snippet:has-text(/\b(Pornhub|OnlyFans|Fansly|GoneWild|Rule\s*34|Hentai|XXX|porn(?:ography)?|nudes?)\b/i)
+yandex.com,yandex.com.tr##li.serp-item:has-text(/\b(Pornhub|OnlyFans|Fansly|GoneWild|Rule\s*34|Hentai|XXX|porn(?:ography)?|nudes?)\b/i)
+search.yahoo.com##div.algo:has-text(/\b(Pornhub|OnlyFans|Fansly|GoneWild|Rule\s*34|Hentai|XXX|porn(?:ography)?|nudes?)\b/i)
+
+! Görsel arama kartları — metin/URL işareti olan yüksek güvenli sonuçlar
+google.com,google.com.tr##div[data-cid]:has-text(/\b(Pornhub|OnlyFans|Fansly|GoneWild|Rule\s*34|Hentai|XXX|porn(?:ography)?|nudes?)\b/i)
+bing.com##a.iusc[href*="porn" i]
+bing.com##a.iusc[href*="hentai" i]
+bing.com##a.iusc[href*="onlyfans" i]
+yandex.com,yandex.com.tr##div.serp-item:has-text(/\b(Pornhub|OnlyFans|Fansly|GoneWild|Rule\s*34|Hentai|XXX|porn(?:ography)?|nudes?)\b/i)

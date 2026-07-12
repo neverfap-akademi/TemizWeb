@@ -1,0 +1,9 @@
+! Title: TemizWeb Ultimate
+! Description: Türkçe odaklı, gizlilik dostu NSFW ve dikkat dağıtıcı yüzey filtresi
+! Homepage: https://erdemyasar-web.github.io/TemizWeb/
+! License: GPL-3.0-or-later
+! Version: 1.0.0
+! Expires: 12 hours
+!
+! SafeSearch veya YouTube Restricted Mode zorlanmaz.
+! Telemetri yoktur; filtreleme cihaz üzerinde uBlock Origin tarafından yapılır.

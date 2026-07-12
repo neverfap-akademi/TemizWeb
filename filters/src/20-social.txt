@@ -1,0 +1,20 @@
+! Reddit — site korunur, işaretli/açık yetişkin kartları gizlenir
+reddit.com##shreddit-post[nsfw]
+reddit.com##article:has([aria-label*="NSFW" i])
+reddit.com##div[data-testid="post-container"]:has([aria-label*="NSFW" i])
+reddit.com##shreddit-post:has-text(/\b(NSFW|Pornhub|OnlyFans|Fansly|GoneWild|Rule\s*34|Hentai|XXX)\b/i)
+reddit.com##article:has-text(/\b(NSFW|Pornhub|OnlyFans|Fansly|GoneWild|Rule\s*34|Hentai|XXX)\b/i)
+reddit.com##shreddit-post:has-text(/\b(porno(?:grafi|grafik|su)?|çıplak\s+(?:fotoğraf|video)|erotik\s+(?:video|fotoğraf)|seks\s+videosu|ifşa\s+(?:video|fotoğraf))\b/i)
+
+! Instagram — profiller, mesajlar ve doğrudan gönderiler korunur
+instagram.com##a[href^="/reels/"]
+instagram.com##a[href="/explore/"]
+instagram.com##a[href^="/explore/"]
+instagram.com##article:has(a[href*="/reel/"])
+instagram.com##div[role="presentation"]:has(a[href*="/reel/"])
+instagram.com##div[role="main"] section:has-text(/^(Suggested for you|Önerilenler|Senin için önerilenler)$/i)
+
+! Diğer kart tabanlı platformlar
+x.com##article:has-text(/\b(NSFW|Pornhub|OnlyFans|Fansly|GoneWild|Rule\s*34|Hentai|XXX)\b/i)
+twitter.com##article:has-text(/\b(NSFW|Pornhub|OnlyFans|Fansly|GoneWild|Rule\s*34|Hentai|XXX)\b/i)
+tumblr.com##article:has-text(/\b(NSFW|Pornhub|OnlyFans|Fansly|Rule\s*34|Hentai|XXX|porn(?:ography)?|nudes?)\b/i)

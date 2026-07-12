@@ -1,0 +1,3 @@
+# TemizWeb DNS
+adult-example.test
+hentai-example.test
