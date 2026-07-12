@@ -13,7 +13,7 @@ Tek ve çakışmasız GitHub Actions workflow'u hem uBlock hem DNS çıktıları
 
 ## uBlock bağlantısı
 
-`https://raw.githubusercontent.com/erdemyasar-web/TemizWeb/main/filters/dist/temizweb-main.txt`
+`https://raw.githubusercontent.com/neverfap-akademi/TemizWeb/main/filters/dist/temizweb-main.txt`
 
 ## Neden tek workflow?
 
