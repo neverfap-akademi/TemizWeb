@@ -125,6 +125,7 @@ def main():
             for line in domain_text.splitlines()
             if (domain := normalize_domain(line))
         }
+        }
         if len(fixture_domains) < minimum:
             raise RuntimeError(
                 f"Too few fixture domains: {len(fixture_domains)}"
@@ -136,17 +137,54 @@ def main():
             f"Too few upstream domains derived from adblock: {len(adult)}"
         )
 
-    rstrip() for p in sorted(FILT
-    parts = [
-        path.read_text(encoding="utf-8").rstrip()
-        for path in sorted(FILTER_SRC.glob("*.txt"))
-    ]
-    merged='\n\n'.join(parts)+'\n\n! Upstream: HaGeZi NSFW (GPL-3.0)\n'+'\n'.join(dict.fromkeys(external_rules))+'\n'
-    FILTER_DIST.parent.mkdir(parents=True,exist_ok=True); FILTER_DIST.write_text(merged,encoding='utf-8')
+    # Generate the universal full-page intent layer before merging
+    # all filter source files.
+    generate_strict_page(
+        FILTER_SRC / "35-strict-page.txt"
+    )
 
-    adult |= read_domains(DNS_SRC/'turkish-adult-supplement.txt')
-    allow=read_domains(DNS_SRC/'allowlist.txt'); vpn=read_domains(DNS_SRC/'vpn-proxy.txt')
-    adult -= allow; strict=(adult|vpn)-allow
+    parts = [
+        path.read_text(
+            encoding="utf-8"
+        ).rstrip()
+        for path in sorted(
+            FILTER_SRC.glob("*.txt")
+        )
+    ]
+
+    merged = (
+        "\n\n".join(parts)
+        + "\n\n! Upstream: HaGeZi NSFW (GPL-3.0)\n"
+        + "\n".join(
+            dict.fromkeys(external_rules)
+        )
+        + "\n"
+    )
+
+    FILTER_DIST.parent.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    FILTER_DIST.write_text(
+        merged,
+        encoding="utf-8",
+    )
+
+    adult |= read_domains(
+        DNS_SRC / "turkish-adult-supplement.txt"
+    )
+
+    allow = read_domains(
+        DNS_SRC / "allowlist.txt"
+    )
+
+    vpn = read_domains(
+        DNS_SRC / "vpn-proxy.txt"
+    )
+
+    adult -= allow
+    strict = (adult | vpn) - allow
     DNS_DIST.mkdir(parents=True,exist_ok=True)
     write_dns('temizweb-balanced',adult); write_dns('temizweb-strict',strict)
     print(f'uBlock: {len(external_rules)} upstream rules; DNS balanced: {len(adult)}; strict: {len(strict)}')
