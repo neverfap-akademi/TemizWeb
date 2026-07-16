@@ -1,112 +1,87 @@
 #!/usr/bin/env python3
 
 """
-Generate TemizWeb's universal strict-page layer.
+Generate TemizWeb's universal strict full-page intent filter.
 
-This does not produce tens of thousands of literal rules. It combines
-large vocabularies into compact regular expressions that represent
-hundreds of thousands or millions of possible phrase combinations.
+This layer is deliberately stricter than post/card filtering.
 
-The generated filter hides the whole page when a strong-risk phrase is
-present in:
+A social post mentioning a leak may be news or discussion. A page title,
+search heading, search field or URL containing a strong combination such
+as "ifşa Türk kızları", "seksi kızlar" or "nude women gallery" expresses
+a much stronger browsing intent.
 
-1. the document title;
-2. the main H1 heading;
-3. an ASCII / URL-encoded path or query.
+The generator creates:
 
-Strong recovery, legal, reporting and victim-support contexts override
-the block.
+1. Title detection
+2. Heading detection
+3. Metadata detection
+4. Search-input detection
+5. Search-region detection
+6. URL/path detection
+7. Protected-context exceptions
+8. Python regression tests for the generated language engine
 """
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
+from urllib.parse import quote, quote_plus
 
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUTPUT = ROOT / "filters" / "src" / "35-strict-page.txt"
 
 
-def alt(parts: list[str] | tuple[str, ...]) -> str:
-    """Join regex fragments as a non-capturing alternation."""
-    cleaned = [part.strip() for part in parts if part.strip()]
+def alt(parts: tuple[str, ...] | list[str]) -> str:
+    """Return a non-capturing regex alternation."""
+    cleaned = [
+        part.strip()
+        for part in parts
+        if part and part.strip()
+    ]
     return "(?:" + "|".join(cleaned) + ")"
 
 
+def literal_regex(value: str) -> str:
+    """
+    Convert a human-readable literal into a whitespace-tolerant regex.
+
+    Example:
+        "türk kızları" -> "türk\\s+kızları"
+    """
+    words = value.split()
+    return r"\s+".join(
+        re.escape(word)
+        for word in words
+    )
+
+
 # ---------------------------------------------------------------------
-# PAGE-LEVEL VOCABULARIES
-#
-# These are intentionally stricter than card-level vocabularies.
-# A page title/query demonstrates intent more strongly than one social
-# post mentioning the same terms.
+# STRONG PAGE-INTENT VOCABULARY
 # ---------------------------------------------------------------------
 
 PEOPLE = (
-    # Turkish
-    r"kadın",
-    r"kadınlar",
-    r"kadını",
-    r"kadınları",
-    r"kadin",
-    r"kadinlar",
-    r"kadini",
-    r"kadinlari",
-    r"kız",
-    r"kızlar",
-    r"kızı",
-    r"kızları",
-    r"kiz",
-    r"kizlar",
-    r"kizi",
-    r"kizlari",
-    r"bayan",
-    r"bayanlar",
-    r"ünlü",
-    r"ünlüler",
-    r"unlu",
-    r"unluler",
-    r"model",
-    r"modeller",
-    r"oyuncu",
-    r"oyuncular",
-    r"şarkıcı",
-    r"şarkıcılar",
-    r"sarkici",
-    r"sarkicilar",
-    r"öğrenci",
-    r"öğrenciler",
-    r"ogrenci",
-    r"ogrenciler",
-    r"liseli",
-    r"liseliler",
-    r"türbanlı",
-    r"türbanlılar",
-    r"turbanli",
-    r"turbanlilar",
-    r"başörtülü",
-    r"başörtülüler",
-    r"basortulu",
-    r"basortululer",
-    r"gelin",
-    r"gelinler",
-    r"hemşire",
-    r"hemşireler",
-    r"hemsire",
-    r"hemsireler",
-    r"öğretmen",
-    r"öğretmenler",
-    r"ogretmen",
-    r"ogretmenler",
-    r"polis",
-    r"hostes",
-    r"hostesler",
-    r"sevgili",
-    r"sevgililer",
-    r"eski\s+sevgili",
-    r"türk\s+kızları",
-    r"türk\s+kadınları",
-    r"turk\s+kizlari",
-    r"turk\s+kadinlari",
+    # Turkish with common suffixes and ASCII variants
+    r"kad[ıi]n(?:lar(?:[ıi])?|[ıi])?",
+    r"k[ıi]z(?:lar(?:[ıi])?|[ıi])?",
+    r"bayan(?:lar[ıi]?)?",
+    r"[üu]nl[üu](?:ler(?:in)?)?",
+    r"model(?:ler(?:in)?)?",
+    r"oyuncu(?:lar(?:[ıi]n)?)?",
+    r"[şs]ark[ıi]c[ıi](?:lar(?:[ıi]n)?)?",
+    r"[öo][ğg]renci(?:ler(?:in)?)?",
+    r"liseli(?:ler(?:in)?)?",
+    r"t[üu]rbanl[ıi](?:lar(?:[ıi]n)?)?",
+    r"ba[şs][öo]rt[üu]l[üu](?:ler(?:in)?)?",
+    r"hem[şs]ire(?:ler(?:in)?)?",
+    r"[öo][ğg]retmen(?:ler(?:in)?)?",
+    r"hostes(?:ler(?:in)?)?",
+    r"gelin(?:ler(?:in)?)?",
+    r"sevgili(?:ler(?:in)?)?",
+    r"eski\s+sevgili(?:ler(?:in)?)?",
+    r"t[üu]rk\s+k[ıi]zlar[ıi]",
+    r"t[üu]rk\s+kad[ıi]nlar[ıi]",
 
     # English
     r"woman",
@@ -131,16 +106,14 @@ PEOPLE = (
     r"students",
     r"schoolgirl",
     r"schoolgirls",
+    r"influencer",
+    r"influencers",
     r"bride",
     r"brides",
     r"nurse",
     r"nurses",
     r"teacher",
     r"teachers",
-    r"policewoman",
-    r"policewomen",
-    r"influencer",
-    r"influencers",
     r"turkish\s+girl",
     r"turkish\s+girls",
     r"turkish\s+woman",
@@ -148,33 +121,13 @@ PEOPLE = (
 )
 
 
-NUDITY = (
-    r"çıplak",
-    r"çıplaklık",
-    r"ciplak",
-    r"ciplaklik",
-    r"nude",
-    r"nudes",
-    r"nudity",
-    r"naked",
-    r"topless",
-    r"üstsüz",
-    r"ustsuz",
-    r"çırılçıplak",
-    r"cirilciplak",
-    r"anadan\s+doğma",
-    r"anadan\s+dogma",
-)
-
-
 SEXUALIZED = (
     r"seksi",
     r"erotik",
-    r"ateşli",
-    r"atesli",
-    r"azdırıcı",
-    r"azdirici",
+    r"ate[şs]li",
+    r"azd[ıi]r[ıi]c[ıi]",
     r"tahrik\s+edici",
+    r"ba[şs]tan\s+[cç][ıi]kar[ıi]c[ıi]",
     r"hot",
     r"sexy",
     r"erotic",
@@ -183,78 +136,68 @@ SEXUALIZED = (
     r"sultry",
     r"steamy",
     r"racy",
-    r"thirst\s*trap",
-    r"thirsttrap",
+    r"thirst[\s-]*trap",
+)
+
+
+NUDITY = (
+    r"[cç][ıi]plak",
+    r"[cç][ıi]plakl[ıi]k",
+    r"[cç][ıi]r[ıi]l[cç][ıi]plak",
+    r"[üu]sts[üu]z",
+    r"anadan\s+do[ğg]ma",
+    r"nude",
+    r"nudes",
+    r"nudity",
+    r"naked",
+    r"topless",
 )
 
 
 REVEALING = (
-    # Turkish
     r"bikinili",
     r"mayolu",
-    r"iç\s+çamaşırlı",
-    r"ic\s+camasirli",
-    r"sütyenli",
-    r"sutyenli",
-    r"sütyensiz",
-    r"sutyensiz",
+    r"i[cç]\s+[cç]ama[şs][ıi]rl[ıi]",
+    r"s[üu]tyenli",
+    r"s[üu]tyensiz",
     r"dekolteli",
     r"transparan",
-    r"şeffaf\s+kıyafetli",
-    r"seffaf\s+kiyafetli",
-    r"mini\s+etekli",
-    r"tangalı",
-    r"tangali",
-
-    # English
+    r"[şs]effaf\s+k[ıi]yafetli",
+    r"tangal[ıi]",
     r"bikini",
     r"micro\s+bikini",
     r"swimsuit",
     r"lingerie",
     r"underwear",
-    r"bra",
     r"braless",
-    r"no\s+bra",
+    r"no[\s-]*bra",
     r"thong",
     r"transparent",
-    r"see[\s-]?through",
+    r"see[\s-]*through",
     r"sheer",
     r"revealing",
     r"cleavage",
-    r"side\s*boob",
-    r"under\s*boob",
-    r"nip\s*slip",
-    r"wardrobe\s+malfunction",
-    r"wet\s+t[\s-]?shirt",
+    r"side[\s-]*boob",
+    r"under[\s-]*boob",
+    r"nip[\s-]*slip",
+    r"wet[\s-]*t[\s-]*shirt",
 )
 
 
 LEAK = (
-    # Turkish
-    r"ifşa",
-    r"ifsa",
-    r"ifşası",
-    r"ifsasi",
-    r"ifşaları",
-    r"ifsalari",
-    r"sızdırılmış",
-    r"sizdirilmis",
-    r"sızdırılan",
-    r"sizdirilan",
-    r"sızıntı",
-    r"sizinti",
-    r"internete\s+düştü",
-    r"internete\s+dustu",
-    r"özel\s+görüntü",
-    r"ozel\s+goruntu",
-    r"gizli\s+çekim",
-    r"gizli\s+cekim",
-
-    # English
+    r"if[şs]a",
+    r"if[şs]as[ıi]",
+    r"if[şs]alar[ıi]",
+    r"s[ıi]zd[ıi]r[ıi]lm[ıi][şs]",
+    r"s[ıi]zd[ıi]r[ıi]lan",
+    r"s[ıi]z[ıi]nt[ıi]",
+    r"internete\s+d[üu][şs]t[üu]",
+    r"[öo]zel\s+g[öo]r[üu]nt[üu]",
+    r"mahrem\s+g[öo]r[üu]nt[üu]",
+    r"gizli\s+[cç]ekim",
     r"leak",
     r"leaks",
     r"leaked",
-    r"leaking",
     r"private\s+leak",
     r"private\s+video",
     r"private\s+photos?",
@@ -266,39 +209,19 @@ LEAK = (
 
 
 MEDIA = (
-    # Turkish
-    r"foto",
-    r"fotolar",
-    r"fotoğraf",
-    r"fotoğraflar",
-    r"fotograf",
-    r"fotograflar",
-    r"resim",
-    r"resimler",
-    r"görüntü",
-    r"görüntüler",
-    r"goruntu",
-    r"goruntuler",
-    r"video",
-    r"videolar",
-    r"kaset",
-    r"kaseti",
-    r"klip",
-    r"klipler",
-    r"galeri",
-    r"galerisi",
-    r"arşiv",
-    r"arşivi",
-    r"arsiv",
-    r"arsivi",
-    r"link",
-    r"linki",
+    r"foto(?:lar)?",
+    r"foto[ğg]raf(?:lar)?",
+    r"resim(?:ler)?",
+    r"g[öo]r[üu]nt[üu](?:ler)?",
+    r"video(?:lar)?",
+    r"kaset(?:i)?",
+    r"klip(?:ler)?",
+    r"galeri(?:si)?",
+    r"ar[şs]iv(?:i)?",
+    r"link(?:i)?",
     r"telegram",
-    r"kanal",
-    r"grup",
-    r"grubu",
-
-    # English
+    r"kanal(?:[ıi])?",
+    r"grup(?:u)?",
     r"photo",
     r"photos",
     r"picture",
@@ -320,77 +243,46 @@ MEDIA = (
     r"album",
     r"stream",
     r"download",
-    r"telegram",
-    r"channel",
 )
 
 
 PORN_CORE = (
-    # Turkish
     r"porno",
     r"pornografi",
     r"seks",
-    r"sevişme",
-    r"sevisme",
-    r"sikiş",
-    r"sikis",
-    r"sikişme",
-    r"sikisme",
-    r"erotik\s+video",
-    r"yetişkin\s+video",
-    r"yetiskin\s+video",
-
-    # English / international
+    r"sevi[şs]me",
+    r"siki[şs](?:me)?",
     r"porn",
-    r"porno",
     r"pornography",
     r"xxx",
     r"hardcore",
     r"softcore",
     r"hentai",
-    r"rule\s*34",
-    r"rule34",
+    r"rule[\s-]*34",
     r"adult\s+video",
     r"adult\s+movie",
 )
 
 
 CONSUMPTION = (
-    # Turkish
     r"izle",
     r"seyret",
-    r"aç",
-    r"ac",
+    r"a[cç]",
     r"indir",
     r"bul",
     r"ara",
-    r"link",
-    r"linki",
-    r"sitesi",
-    r"site",
-    r"video",
-    r"videosu",
-    r"filmi",
-    r"film",
-    r"galeri",
-    r"galerisi",
-    r"arşiv",
-    r"arşivi",
-    r"arsiv",
-    r"arsivi",
-    r"foto",
-    r"fotoğraf",
-    r"fotograf",
+    r"link(?:i)?",
+    r"site(?:si)?",
+    r"video(?:su)?",
+    r"film(?:i)?",
+    r"galeri(?:si)?",
+    r"ar[şs]iv(?:i)?",
+    r"foto(?:[ğg]raf)?",
     r"resim",
-    r"görüntü",
-    r"goruntu",
-    r"canlı",
-    r"canli",
-
-    # English
+    r"g[öo]r[üu]nt[üu]",
+    r"canl[ıi]",
     r"watch",
     r"view",
-    r"see",
     r"download",
     r"stream",
     r"videos?",
@@ -405,8 +297,7 @@ CONSUMPTION = (
     r"gallery",
     r"archive",
     r"collection",
-    r"site",
-    r"sites",
+    r"sites?",
     r"links?",
     r"free",
     r"online",
@@ -414,7 +305,7 @@ CONSUMPTION = (
 )
 
 
-NAMED_EXPLICIT = (
+DIRECT_STRONG = (
     r"pornhub",
     r"xvideos",
     r"xnxx",
@@ -422,49 +313,22 @@ NAMED_EXPLICIT = (
     r"redtube",
     r"youporn",
     r"brazzers",
-    r"onlyfans\s+(?:ifşa|ifsa|leak|leaks|leaked|nude|nudes|porn)",
-    r"(?:ifşa|ifsa|leaked|free)\s+onlyfans",
-    r"fansly\s+(?:ifşa|ifsa|leak|leaks|leaked|nude|nudes|porn)",
     r"gonewild",
-    r"camgirl",
-    r"camgirls",
+    r"camgirls?",
     r"webcam\s+sex",
-    r"sex\s+cam",
-    r"sex\s+cams",
     r"live\s+sex",
-    r"escort\s+(?:ilan|ilanları|numara|numaraları|bul|ara)",
-)
-
-
-# Strong phrases that do not require a person term.
-DIRECT_STRONG = (
-    r"porno\s+(?:izle|seyret|aç|ac|indir|video|videosu|film|filmi|galeri|arşiv|arsiv|site|sitesi|link)",
-    r"bedava\s+porno",
-    r"ücretsiz\s+porno",
-    r"ucretsiz\s+porno",
-    r"online\s+porno",
-    r"seks\s+(?:izle|video|videosu|film|filmi|kaset|kaseti|görüntü|goruntu|yayın|yayin|kamera|webcam)",
-    r"sevişme\s+(?:izle|video|videosu|görüntü|goruntu|kaset|kaseti)",
-    r"sevisme\s+(?:izle|video|videosu|goruntu|kaset|kaseti)",
-    r"intikam\s+pornosu\s+(?:izle|video|görüntü|goruntu|ifşa|ifsa|arşiv|arsiv)",
-    r"revenge\s+porn\s+(?:videos?|images?|photos?|pics?|watch|gallery|download)",
-    r"porn\s+(?:videos?|movies?|clips?|gifs?|images?|pictures?|pics?|photos?|gallery|stream|streaming|download)",
+    r"sex\s+cams?",
+    r"onlyfans.{0,50}(?:if[şs]a|leak|leaked|nude|porn)",
+    r"(?:if[şs]a|leak|leaked|free).{0,50}onlyfans",
+    r"fansly.{0,50}(?:if[şs]a|leak|leaked|nude|porn)",
     r"free\s+porn",
     r"watch\s+porn",
     r"download\s+porn",
-    r"adult\s+(?:movies?|videos?)",
-    r"sex\s+(?:videos?|movies?|tape|cams?|webcams?)",
-    r"nude\s+(?:gallery|photos?|pics?|pictures?|images?|videos?|selfies?)",
-    r"naked\s+(?:gallery|photos?|pics?|pictures?|images?|videos?|selfies?)",
     r"leaked\s+nudes?",
     r"nude\s+leaks?",
     r"celebrity\s+nudes?",
-    r"private\s+(?:video|photos?|pics?)\s+leak(?:ed)?",
-    r"leaked\s+private\s+(?:video|photos?|pics?)",
-    r"gizli\s+(?:kamera|çekim)\s+(?:seks|sevişme|çıplak)",
-    r"gizli\s+cekim\s+(?:seks|sevisme|ciplak)",
-    r"voyeur\s+(?:video|videos?|pics?|photos?)",
-    r"upskirt\s+(?:video|videos?|pics?|photos?)",
+    r"revenge\s+porn.{0,40}(?:video|image|photo|watch|gallery)",
+    r"intikam\s+pornosu.{0,40}(?:izle|video|g[öo]r[üu]nt[üu]|if[şs]a|ar[şs]iv)",
 )
 
 
@@ -472,30 +336,22 @@ DIRECT_STRONG = (
 # PROTECTED CONTEXTS
 # ---------------------------------------------------------------------
 
-RECOVERY_PROTECTED = (
-    r"porno\s+bağımlılı(?:ğı|k)",
-    r"porno\s+bagimlili(?:gi|k)",
-    r"pornografi\s+bağımlılı(?:ğı|k)",
-    r"pornografi\s+bagimlili(?:gi|k)",
-    r"pornoyu\s+bırak",
-    r"pornoyu\s+birak",
-    r"porno\s+izlemeyi\s+bırak",
-    r"porno\s+izlemeyi\s+birak",
+RECOVERY = (
+    r"porno\s+ba[ğg][ıi]ml[ıi]l[ıi][ğg][ıi]",
+    r"pornografi\s+ba[ğg][ıi]ml[ıi]l[ıi][ğg][ıi]",
+    r"pornoyu\s+b[ıi]rak",
+    r"porno\s+izlemeyi\s+b[ıi]rak",
     r"pornodan\s+kurtul",
-    r"porno\s+bağımlılığı\s+tedavisi",
-    r"porno\s+bagimliligi\s+tedavisi",
-    r"pornografinin\s+zararları",
-    r"pornografinin\s+zararlari",
+    r"porno.{0,30}tedavi",
+    r"pornografinin\s+zararlar[ıi]",
     r"porno\s+engelleme",
-    r"pornografi\s+araştırma",
-    r"pornografi\s+arastirma",
     r"porn\s+addiction",
     r"pornography\s+addiction",
     r"quit\s+porn",
     r"stop\s+watching\s+porn",
     r"porn\s+recovery",
     r"pornography\s+recovery",
-    r"porn\s+addiction\s+treatment",
+    r"porn.{0,30}treatment",
     r"harms\s+of\s+pornography",
     r"porn\s+blocker",
     r"block\s+adult\s+content",
@@ -505,319 +361,565 @@ RECOVERY_PROTECTED = (
 
 ABUSE_SUBJECT = (
     r"intikam\s+pornosu",
-    r"özel\s+görüntü",
-    r"ozel\s+goruntu",
-    r"mahrem\s+görüntü",
-    r"mahrem\s+goruntu",
-    r"ifşa",
-    r"ifsa",
-    r"sızdırılmış\s+görüntü",
-    r"sizdirilmis\s+goruntu",
+    r"[öo]zel\s+g[öo]r[üu]nt[üu]",
+    r"mahrem\s+g[öo]r[üu]nt[üu]",
+    r"if[şs]a",
+    r"s[ıi]zd[ıi]r[ıi]lm[ıi][şs]\s+g[öo]r[üu]nt[üu]",
     r"gizli\s+kamera",
-    r"gizli\s+çekim",
-    r"gizli\s+cekim",
+    r"gizli\s+[cç]ekim",
     r"deepfake",
-    r"çıplaklaştırma",
-    r"ciplaklastirma",
+    r"[cç][ıi]plakla[şs]t[ıi]rma",
     r"revenge\s+porn",
     r"intimate\s+image\s+abuse",
-    r"non[\s-]?consensual\s+intimate\s+images?",
-    r"image[\s-]?based\s+sexual\s+abuse",
-    r"leaked\s+images?",
-    r"leaked\s+photos?",
+    r"non[\s-]*consensual\s+intimate\s+images?",
+    r"image[\s-]*based\s+sexual\s+abuse",
+    r"leaked\s+(?:images?|photos?)",
     r"hidden\s+camera",
     r"voyeurism",
     r"upskirt",
-    r"deepfake\s+abuse",
     r"nudification",
 )
 
 
 HELP_CONTEXT = (
-    # Turkish
-    r"mağdur",
-    r"mağduru",
-    r"mağdurlar",
-    r"mağdurları",
-    r"magdur",
-    r"magduru",
-    r"magdurlar",
-    r"magdurlari",
-    r"mağdur\s+desteği",
-    r"magdur\s+destegi",
+    r"ma[ğg]dur(?:u|lar[ıi]?)?",
     r"destek",
-    r"yardım",
-    r"yardim",
-    r"hukuk",
-    r"hukuki",
+    r"yard[ıi]m",
+    r"hukuk(?:i)?",
     r"yasal",
-    r"yasa",
-    r"yasası",
-    r"yasasi",
-    r"suç",
-    r"suçu",
-    r"suc",
-    r"sucu",
-    r"şikâyet",
-    r"şikayet",
-    r"sikayet",
+    r"yasa(?:s[ıi])?",
+    r"su[cç](?:u)?",
+    r"[şs]ikayet",
     r"ihbar",
     r"bildir",
-    r"kaldırma\s+talebi",
-    r"kaldirma\s+talebi",
-    r"nasıl\s+kaldırılır",
-    r"nasil\s+kaldirilir",
-    r"haklar",
-    r"hakları",
-    r"haklari",
+    r"kald[ıi]rma",
+    r"haklar[ıi]?",
     r"korunma",
-    r"önleme",
-    r"onleme",
-
-    # English
-    r"victim",
-    r"victims",
-    r"victim\s+support",
-    r"survivor",
-    r"survivors",
+    r"[öo]nleme",
+    r"victims?",
+    r"survivors?",
     r"support",
     r"help",
     r"legal",
-    r"law",
-    r"laws",
+    r"laws?",
     r"crime",
     r"criminal",
     r"report",
     r"reporting",
-    r"remove",
     r"removal",
     r"takedown",
     r"rights",
-    r"safety",
     r"prevention",
 )
 
 
+LINGUISTIC_CONTEXT = (
+    r"kelimesi",
+    r"kelimenin",
+    r"anlam[ıi]",
+    r"ne\s+demek",
+    r"[cç]eviri",
+    r"s[öo]zl[üu]k",
+    r"tan[ıi]m",
+    r"definition",
+    r"meaning",
+    r"translation",
+    r"dictionary",
+    r"etymology",
+)
+
+
+# ---------------------------------------------------------------------
+# URL TOKENS
+# ---------------------------------------------------------------------
+
+URL_PEOPLE_LITERALS = (
+    "kadın",
+    "kadınlar",
+    "kadin",
+    "kadinlar",
+    "kız",
+    "kızlar",
+    "kiz",
+    "kizlar",
+    "türk kızları",
+    "turk kizlari",
+    "woman",
+    "women",
+    "girl",
+    "girls",
+    "female",
+    "model",
+    "models",
+    "celebrity",
+    "turkish girls",
+    "turkish women",
+)
+
+URL_SEXUALIZED_LITERALS = (
+    "seksi",
+    "ateşli",
+    "atesli",
+    "erotik",
+    "hot",
+    "sexy",
+    "erotic",
+    "seductive",
+    "provocative",
+)
+
+URL_NUDITY_LITERALS = (
+    "çıplak",
+    "ciplak",
+    "çıplaklık",
+    "ciplaklik",
+    "nude",
+    "nudes",
+    "naked",
+    "topless",
+)
+
+URL_LEAK_LITERALS = (
+    "ifşa",
+    "ifsa",
+    "sızdırılmış",
+    "sizdirilmis",
+    "sızıntı",
+    "sizinti",
+    "leak",
+    "leaks",
+    "leaked",
+)
+
+URL_MEDIA_LITERALS = (
+    "foto",
+    "fotoğraf",
+    "fotograf",
+    "resim",
+    "görüntü",
+    "goruntu",
+    "video",
+    "galeri",
+    "arşiv",
+    "arsiv",
+    "photo",
+    "photos",
+    "pics",
+    "images",
+    "videos",
+    "gallery",
+    "archive",
+)
+
+
+def encode_url_literal(value: str) -> tuple[str, ...]:
+    """
+    Return common representations of one URL phrase.
+
+    This handles:
+    - plain Unicode
+    - ASCII-looking literal
+    - %20 encoding
+    - + encoding
+    - hyphenated and underscored slugs
+    """
+    variants = {
+        value,
+        quote(value, safe=""),
+        quote_plus(value, safe=""),
+        value.replace(" ", "-"),
+        value.replace(" ", "_"),
+        value.replace(" ", "+"),
+    }
+
+    return tuple(
+        re.escape(item)
+        for item in sorted(variants)
+        if item
+    )
+
+
+def build_url_group(values: tuple[str, ...]) -> str:
+    fragments: list[str] = []
+
+    for value in values:
+        fragments.extend(
+            encode_url_literal(value)
+        )
+
+    return alt(tuple(dict.fromkeys(fragments)))
+
+
+# ---------------------------------------------------------------------
+# PATTERN CONSTRUCTION
+# ---------------------------------------------------------------------
+
 def build_patterns() -> tuple[str, str, str]:
     people = alt(PEOPLE)
-    nudity = alt(NUDITY)
     sexualized = alt(SEXUALIZED)
+    nudity = alt(NUDITY)
     revealing = alt(REVEALING)
     leak = alt(LEAK)
     media = alt(MEDIA)
     porn_core = alt(PORN_CORE)
     consumption = alt(CONSUMPTION)
-    named_explicit = alt(NAMED_EXPLICIT)
     direct_strong = alt(DIRECT_STRONG)
 
-    # Any punctuation, words or branding may occur between important terms.
-    # The maximum distances are deliberately finite to avoid matching an
-    # unrelated term elsewhere in a long title.
-    page_risk_parts = (
-        named_explicit,
+    # Finite distances allow branding and filler words:
+    #
+    # "ifşa amazing girl türk kızları"
+    # "seksi ve güzel Türk kızları"
+    # "private Turkish celebrity photos leaked"
+    risk_parts = (
         direct_strong,
 
-        # "çıplak kadın", "nude amazing Turkish girl", etc.
-        rf"{nudity}.{{0,55}}{people}",
-        rf"{people}.{{0,55}}{nudity}",
+        rf"{sexualized}.{{0,80}}{people}",
+        rf"{people}.{{0,80}}{sexualized}",
 
-        # "hot women", "seksi Türk kızları", etc.
-        rf"{sexualized}.{{0,55}}{people}",
-        rf"{people}.{{0,55}}{sexualized}",
+        rf"{nudity}.{{0,80}}{people}",
+        rf"{people}.{{0,80}}{nudity}",
 
-        # Bikini / lingerie / transparent clothing intent.
-        rf"{revealing}.{{0,55}}{people}",
-        rf"{people}.{{0,55}}{revealing}",
+        rf"{revealing}.{{0,80}}{people}",
+        rf"{people}.{{0,80}}{revealing}",
 
-        # Page-level leak intent. Unlike card filtering, media is not
-        # required when leak + person/group already establishes intent.
-        rf"{leak}.{{0,90}}{people}",
-        rf"{people}.{{0,90}}{leak}",
+        # Page-level intent is stricter than card filtering:
+        # leak + person is sufficient; media is not required.
+        rf"{leak}.{{0,120}}{people}",
+        rf"{people}.{{0,120}}{leak}",
 
-        # Strong consumption intent.
-        rf"{porn_core}.{{0,45}}{consumption}",
-        rf"{consumption}.{{0,45}}{porn_core}",
+        rf"{leak}.{{0,80}}{media}",
+        rf"{media}.{{0,80}}{leak}",
 
-        # Leak + media is strong even when a person term is omitted.
-        rf"{leak}.{{0,55}}{media}",
-        rf"{media}.{{0,55}}{leak}",
+        rf"{porn_core}.{{0,60}}{consumption}",
+        rf"{consumption}.{{0,60}}{porn_core}",
     )
 
-    page_risk = alt(page_risk_parts)
+    page_risk = alt(risk_parts)
 
-    recovery = alt(RECOVERY_PROTECTED)
+    recovery = alt(RECOVERY)
     abuse_subject = alt(ABUSE_SUBJECT)
     help_context = alt(HELP_CONTEXT)
+    linguistic_context = alt(LINGUISTIC_CONTEXT)
 
     protected_parts = (
         recovery,
 
-        # Both directions cover:
-        # "intikam pornosu mağdur desteği"
-        # "hukuki yardım: intikam pornosu"
-        rf"{abuse_subject}.{{0,100}}{help_context}",
-        rf"{help_context}.{{0,100}}{abuse_subject}",
+        rf"{abuse_subject}.{{0,140}}{help_context}",
+        rf"{help_context}.{{0,140}}{abuse_subject}",
+
+        # Prevent dictionary/translation searches such as:
+        # "seksi kelimesinin anlamı"
+        rf"(?:{sexualized}|{nudity}|{leak}).{{0,80}}{linguistic_context}",
+        rf"{linguistic_context}.{{0,80}}(?:{sexualized}|{nudity}|{leak})",
     )
 
     protected = alt(protected_parts)
 
-    # URL matching is intentionally ASCII-oriented because accented
-    # characters may be UTF-8 percent encoded differently by websites.
-    url_separator = r"(?:%20|%2520|\+|[-_./]|%2f|%3a){1,6}"
-
-    url_people = alt(
-        (
-            r"woman",
-            r"women",
-            r"girl",
-            r"girls",
-            r"lady",
-            r"ladies",
-            r"female",
-            r"females",
-            r"babe",
-            r"babes",
-            r"model",
-            r"models",
-            r"celebrity",
-            r"celebrities",
-            r"actress",
-            r"actresses",
-            r"kadin",
-            r"kadinlar",
-            r"kiz",
-            r"kizlar",
-            r"bayan",
-            r"unlu",
-            r"unluler",
-            r"turk",
-            r"turkish",
-        )
+    url_people = build_url_group(
+        URL_PEOPLE_LITERALS
+    )
+    url_sexualized = build_url_group(
+        URL_SEXUALIZED_LITERALS
+    )
+    url_nudity = build_url_group(
+        URL_NUDITY_LITERALS
+    )
+    url_leak = build_url_group(
+        URL_LEAK_LITERALS
+    )
+    url_media = build_url_group(
+        URL_MEDIA_LITERALS
     )
 
-    url_nudity = alt(
-        (
-            r"nude",
-            r"nudes",
-            r"nudity",
-            r"naked",
-            r"topless",
-            r"ciplak",
-            r"ciplaklik",
-            r"ustsuz",
-        )
-    )
-
-    url_sexualized = alt(
-        (
-            r"hot",
-            r"sexy",
-            r"erotic",
-            r"seductive",
-            r"provocative",
-            r"sultry",
-            r"atesli",
-            r"seksi",
-            r"erotik",
-            r"azdirici",
-        )
-    )
-
-    url_leak = alt(
-        (
-            r"ifsa",
-            r"ifsha",
-            r"leak",
-            r"leaks",
-            r"leaked",
-            r"sizdirilmis",
-            r"sizinti",
-            r"private",
-        )
-    )
-
-    url_media = alt(
-        (
-            r"photo",
-            r"photos",
-            r"pic",
-            r"pics",
-            r"picture",
-            r"pictures",
-            r"image",
-            r"images",
-            r"video",
-            r"videos",
-            r"gallery",
-            r"archive",
-            r"collection",
-            r"pack",
-            r"foto",
-            r"fotograf",
-            r"resim",
-            r"goruntu",
-            r"galeri",
-            r"arsiv",
-        )
-    )
-
-    url_porn = alt(
-        (
-            r"porn",
-            r"porno",
-            r"xxx",
-            r"hentai",
-            r"sex",
-            r"seks",
-            r"sikis",
-            r"sevisme",
-        )
-    )
-
-    url_action = alt(
-        (
-            r"watch",
-            r"download",
-            r"stream",
-            r"video",
-            r"videos",
-            r"movie",
-            r"movies",
-            r"gallery",
-            r"archive",
-            r"free",
-            r"online",
-            r"izle",
-            r"indir",
-            r"video",
-            r"film",
-            r"galeri",
-            r"arsiv",
-        )
-    )
-
+    # URL strings may contain arbitrary encoded filler between groups.
     url_risk = alt(
         (
-            rf"{url_nudity}{url_separator}{url_people}",
-            rf"{url_people}{url_separator}{url_nudity}",
-            rf"{url_sexualized}{url_separator}{url_people}",
-            rf"{url_people}{url_separator}{url_sexualized}",
-            rf"{url_leak}(?:.{{0,120}}){url_people}",
-            rf"{url_people}(?:.{{0,120}}){url_leak}",
-            rf"{url_leak}{url_separator}{url_media}",
-            rf"{url_media}{url_separator}{url_leak}",
-            rf"{url_porn}{url_separator}{url_action}",
-            rf"{url_action}{url_separator}{url_porn}",
-            r"onlyfans(?:.{0,80})(?:ifsa|ifsha|leak|leaked|nude|porn)",
-            r"(?:ifsa|ifsha|leak|leaked|free)(?:.{0,80})onlyfans",
+            rf"{url_sexualized}.{{0,180}}{url_people}",
+            rf"{url_people}.{{0,180}}{url_sexualized}",
+
+            rf"{url_nudity}.{{0,180}}{url_people}",
+            rf"{url_people}.{{0,180}}{url_nudity}",
+
+            rf"{url_leak}.{{0,220}}{url_people}",
+            rf"{url_people}.{{0,220}}{url_leak}",
+
+            rf"{url_leak}.{{0,180}}{url_media}",
+            rf"{url_media}.{{0,180}}{url_leak}",
+
+            r"onlyfans.{0,160}(?:ifsa|if%C5%9Fa|leak|leaked|nude|porn)",
+            r"(?:ifsa|if%C5%9Fa|leak|leaked|free).{0,160}onlyfans",
+
+            r"(?:porn|porno|xxx|hentai).{0,100}"
+            r"(?:watch|izle|video|videos|gallery|galeri|archive|arsiv|download|indir)",
         )
     )
 
     return page_risk, protected, url_risk
 
 
-def generate_strict_page(output_path: Path = DEFAULT_OUTPUT) -> Path:
+# ---------------------------------------------------------------------
+# REAL REGRESSION TESTS
+# ---------------------------------------------------------------------
+
+POSITIVE_TESTS = (
+    "seksi kızlar",
+    "seksi kizlar",
+    "seksi güzel Türk kızları",
+    "Türk kızları seksi videolar",
+    "hot women",
+    "hot amazing Turkish girls",
+    "sexy female models",
+    "çıplak kadın",
+    "ciplak kadinlar",
+    "nude Turkish women",
+    "naked girl gallery",
+    "ifşa amazing girl türk kızları",
+    "ifsa turk kizlari",
+    "Türk kızları yeni ifşa",
+    "ünlü oyuncu özel görüntü ifşa",
+    "leaked celebrity photos",
+    "private Turkish model leaked",
+    "onlyfans ifşa",
+    "free porn videos",
+    "porno izle",
+)
+
+
+NEGATIVE_TESTS = (
+    "kadın bilim insanları",
+    "Türk kızlarının eğitim başarısı",
+    "kadın doktorların çalışma koşulları",
+    "hot weather",
+    "hot water system",
+    "model uçak yapımı",
+    "bikini tarihi",
+    "mayo tasarımı",
+    "seksi kelimesinin anlamı",
+    "hot kelimesinin Türkçe çevirisi",
+    "nude kelimesi ne demek",
+    "ifşa kelimesinin anlamı",
+    "intikam pornosu mağdur desteği",
+    "ifşa mağduru hukuki yardım",
+    "özel görüntülerin yayılması suçu",
+    "intimate image abuse support",
+    "revenge porn law",
+    "porn recovery",
+    "pornography addiction treatment",
+)
+
+
+def run_regression_tests() -> None:
+    page_risk, protected, _ = build_patterns()
+
+    try:
+        risk_re = re.compile(
+            page_risk,
+            re.IGNORECASE,
+        )
+        protected_re = re.compile(
+            protected,
+            re.IGNORECASE,
+        )
+    except re.error as exc:
+        raise RuntimeError(
+            f"Strict-page regex failed to compile: {exc}"
+        ) from exc
+
+    failures: list[str] = []
+
+    for text in POSITIVE_TESTS:
+        risk_match = risk_re.search(text)
+        protected_match = protected_re.search(text)
+
+        if not risk_match:
+            failures.append(
+                f"Expected BLOCK but risk regex missed: {text!r}"
+            )
+        elif protected_match:
+            failures.append(
+                f"Expected BLOCK but protection regex matched: {text!r}"
+            )
+
+    for text in NEGATIVE_TESTS:
+        risk_match = risk_re.search(text)
+        protected_match = protected_re.search(text)
+
+        effective_block = bool(
+            risk_match and not protected_match
+        )
+
+        if effective_block:
+            failures.append(
+                f"Expected ALLOW but effective block matched: {text!r}"
+            )
+
+    if failures:
+        raise RuntimeError(
+            "Strict-page regression failures:\n"
+            + "\n".join(
+                f"- {failure}"
+                for failure in failures
+            )
+        )
+
+    print(
+        "Strict-page language regression tests passed: "
+        f"{len(POSITIVE_TESTS)} block cases, "
+        f"{len(NEGATIVE_TESTS)} allow cases"
+    )
+
+
+# ---------------------------------------------------------------------
+# UBLOCK RULE GENERATION
+# ---------------------------------------------------------------------
+
+def protection_guards(
+    protected: str,
+) -> str:
+    """
+    Return common protected-context guards.
+
+    We inspect several prominent regions because protected wording may
+    occur in the title, heading or search-result header.
+    """
+    return (
+        f":not(:has(title:has-text(/{protected}/iu)))"
+        f":not(:has(h1:has-text(/{protected}/iu)))"
+        f":not(:has(h2:has-text(/{protected}/iu)))"
+        f":not(:has(h3:has-text(/{protected}/iu)))"
+        f":not(:has([role=\"heading\"]:has-text(/{protected}/iu)))"
+    )
+
+
+def generate_strict_page(
+    output_path: Path = DEFAULT_OUTPUT,
+) -> Path:
+    run_regression_tests()
+
     page_risk, protected, url_risk = build_patterns()
+    guards = protection_guards(protected)
+
+    rules = (
+        # Document title
+        (
+            "*##html"
+            f":has(title:has-text(/{page_risk}/iu))"
+            f"{guards}"
+            " > body"
+        ),
+
+        # Standard heading levels
+        (
+            "*##html"
+            f":has(h1:has-text(/{page_risk}/iu))"
+            f"{guards}"
+            " > body"
+        ),
+        (
+            "*##html"
+            f":has(h2:has-text(/{page_risk}/iu))"
+            f"{guards}"
+            " > body"
+        ),
+        (
+            "*##html"
+            f":has(h3:has-text(/{page_risk}/iu))"
+            f"{guards}"
+            " > body"
+        ),
+
+        # ARIA heading used by JavaScript applications
+        (
+            "*##html"
+            f":has([role=\"heading\"]:has-text(/{page_risk}/iu))"
+            f"{guards}"
+            " > body"
+        ),
+
+        # Open Graph and Twitter metadata
+        (
+            "*##html"
+            f":has(meta[property=\"og:title\"]"
+            f":matches-attr(content=/{page_risk}/iu))"
+            f"{guards}"
+            " > body"
+        ),
+        (
+            "*##html"
+            f":has(meta[name=\"twitter:title\"]"
+            f":matches-attr(content=/{page_risk}/iu))"
+            f"{guards}"
+            " > body"
+        ),
+        (
+            "*##html"
+            f":has(meta[name=\"description\"]"
+            f":matches-attr(content=/{page_risk}/iu))"
+            f"{guards}"
+            " > body"
+        ),
+
+        # Search input values
+        (
+            "*##html"
+            f":has(input[type=\"search\"]"
+            f":matches-attr(value=/{page_risk}/iu))"
+            f"{guards}"
+            " > body"
+        ),
+        (
+            "*##html"
+            f":has(input[name=\"q\"]"
+            f":matches-attr(value=/{page_risk}/iu))"
+            f"{guards}"
+            " > body"
+        ),
+        (
+            "*##html"
+            f":has(input[role=\"searchbox\"]"
+            f":matches-attr(value=/{page_risk}/iu))"
+            f"{guards}"
+            " > body"
+        ),
+
+        # Common custom search attributes
+        (
+            "*##html"
+            f":has([data-query]"
+            f":matches-attr(data-query=/{page_risk}/iu))"
+            f"{guards}"
+            " > body"
+        ),
+        (
+            "*##html"
+            f":has([data-search-query]"
+            f":matches-attr(data-search-query=/{page_risk}/iu))"
+            f"{guards}"
+            " > body"
+        ),
+
+        # Text shown inside a bounded search region
+        (
+            "*##html"
+            f":has([role=\"search\"]:has-text(/{page_risk}/iu))"
+            f"{guards}"
+            " > body"
+        ),
+        (
+            "*##html"
+            f":has(form[role=\"search\"]:has-text(/{page_risk}/iu))"
+            f"{guards}"
+            " > body"
+        ),
+
+        # URL path and query fallback
+        (
+            "*##html"
+            f":matches-path(/{url_risk}/i)"
+            f"{guards}"
+            " > body"
+        ),
+    )
 
     lines = [
         "! =============================================================================",
@@ -826,54 +928,46 @@ def generate_strict_page(output_path: Path = DEFAULT_OUTPUT) -> Path:
         "!",
         "! GENERATED FILE — edit scripts/generate_strict_page.py instead.",
         "!",
-        "! PURPOSE",
-        "! - Apply Google-style full-page strictness to destination websites.",
-        "! - Trigger from strong-risk page titles, H1 headings or URL paths.",
-        "! - Cover Turkish and English combinatorial phrase variants.",
-        "! - Preserve recovery, legal, reporting and victim-support contexts.",
+        "! SIGNALS",
+        "! - Document title",
+        "! - H1, H2, H3 and ARIA headings",
+        "! - Open Graph, Twitter and description metadata",
+        "! - Search input values and custom query attributes",
+        "! - Bounded search-region text",
+        "! - URL path/query, including common UTF-8 encodings",
         "!",
-        "! IMPORTANT",
-        "! - This is stricter than card-level filtering.",
-        "! - A strong page/query intent hides the whole body.",
-        "! - SafeSearch and Restricted Mode are still not forced.",
+        "! POLICY",
+        "! - Page-intent detection is stricter than card filtering.",
+        "! - Strong recovery, legal and victim-support contexts override blocking.",
+        "! - SafeSearch and Restricted Mode are not forced.",
         "! =============================================================================",
-        "",
-        "! Strong-risk phrase in document title",
-        (
-            "*##html"
-            f":has(title:has-text(/{page_risk}/iu))"
-            f":not(:has(title:has-text(/{protected}/iu)))"
-            f":not(:has(h1:has-text(/{protected}/iu)))"
-            " > body"
-        ),
-        "",
-        "! Strong-risk phrase in main page heading",
-        (
-            "*##html"
-            f":has(h1:has-text(/{page_risk}/iu))"
-            f":not(:has(title:has-text(/{protected}/iu)))"
-            f":not(:has(h1:has-text(/{protected}/iu)))"
-            " > body"
-        ),
-        "",
-        "! ASCII and URL-encoded path/query fallback",
-        (
-            "*##html"
-            f":matches-path(/{url_risk}/i)"
-            f":not(:has(title:has-text(/{protected}/iu)))"
-            f":not(:has(h1:has-text(/{protected}/iu)))"
-            " > body"
-        ),
         "",
     ]
 
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.write_text("\n".join(lines), encoding="utf-8")
+    for index, rule in enumerate(rules, start=1):
+        lines.append(
+            f"! Strict-page signal {index}"
+        )
+        lines.append(rule)
+        lines.append("")
+
+    output_path.parent.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+    output_path.write_text(
+        "\n".join(lines),
+        encoding="utf-8",
+    )
 
     print(
         "Generated universal strict-page filter: "
         f"{output_path.relative_to(ROOT)}"
     )
+    print(
+        f"Generated {len(rules)} strict-page signal rules"
+    )
+
     return output_path
 
 
