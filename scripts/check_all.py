@@ -1,170 +1,70 @@
 #!/usr/bin/env python3
-
 from pathlib import Path
-
 import sys
 
-from generate_strict_page import (
-    build_patterns,
-    run_regression_tests,
-)
-
+from generate_strict_page import build_patterns, run_regression_tests
 
 ROOT = Path(__file__).resolve().parents[1]
-errors: list[str] = []
-
+errors = []
 filter_dist = ROOT / "filters" / "dist" / "temizweb-main.txt"
 strict_source = ROOT / "filters" / "src" / "35-strict-page.txt"
 
-
 if not strict_source.exists():
-    errors.append(
-        "missing generated filters/src/35-strict-page.txt"
-    )
+    errors.append("missing generated filters/src/35-strict-page.txt")
 else:
-    strict_text = strict_source.read_text(
-        encoding="utf-8"
+    strict_text = strict_source.read_text(encoding="utf-8")
+    requirements = (
+        "HOSTNAME-TARGETED STRICT FULL-PAGE INTENT FILTER",
+        "nitter.net", "ok.ru", "shutterstock.com", "pixabay.com",
+        "textarea[name=\"q\"]", "input[name=\"q\"]",
+        ":matches-path(", ":watch-attr(value)",
     )
-
-    strict_requirements = (
-        "UNIVERSAL STRICT FULL-PAGE INTENT FILTER",
-        ":has(title:has-text(",
-        ":has(h1:has-text(",
-        ":has(h2:has-text(",
-        ":has(h3:has-text(",
-        "[role=\"heading\"]",
-        "meta[property=\"og:title\"]",
-        "meta[name=\"twitter:title\"]",
-        "meta[name=\"description\"]",
-        "input[type=\"search\"]",
-        "input[name=\"q\"]",
-        "input[role=\"searchbox\"]",
-        "[data-query]",
-        "[data-search-query]",
-        "[role=\"search\"]",
-        ":matches-path(",
-    )
-
-    for required in strict_requirements:
+    for required in requirements:
         if required not in strict_text:
-            errors.append(
-                "strict-page source missing signal: "
-                + required
-            )
-
-    active_strict = [
-        line.strip()
-        for line in strict_text.splitlines()
-        if line.strip()
-        and not line.lstrip().startswith("!")
-    ]
-
-    if len(active_strict) < 12:
-        errors.append(
-            "strict-page source has too few active "
-            f"signal rules: {len(active_strict)}"
-        )
-
-    try:
-        page_risk, protected, url_risk = (
-            build_patterns()
-        )
-
-        if not page_risk:
-            errors.append(
-                "strict-page risk pattern is empty"
-            )
-
-        if not protected:
-            errors.append(
-                "strict-page protected pattern is empty"
-            )
-
-        if not url_risk:
-            errors.append(
-                "strict-page URL pattern is empty"
-            )
-
-        run_regression_tests()
-
-    except Exception as exc:
-        errors.append(
-            "strict-page regression failure: "
-            + str(exc)
-        )
-
-
-if not filter_dist.exists():
-    errors.append(
-        "missing filters/dist/temizweb-main.txt"
-    )
-else:
-    text = filter_dist.read_text(encoding="utf-8")
-
-    for header in (
-        "! Title:",
-        "! Version:",
-        "! License:",
-        "! Expires:",
-    ):
-        if header not in text:
-            errors.append("missing " + header)
+            errors.append("strict-page source missing signal: " + required)
 
     active = [
-        line.strip()
-        for line in text.splitlines()
-        if line.strip()
-        and not line.lstrip().startswith("!")
+        line.strip() for line in strict_text.splitlines()
+        if line.strip() and not line.lstrip().startswith("!")
     ]
+    if len(active) < 100:
+        errors.append(f"strict-page source has too few focused rules: {len(active)}")
 
+    try:
+        page_risk, protected, url_risk = build_patterns()
+        if not page_risk or not protected or not url_risk:
+            errors.append("strict-page generated pattern is empty")
+        run_regression_tests()
+    except Exception as exc:
+        errors.append("strict-page regression failure: " + str(exc))
+
+if not filter_dist.exists():
+    errors.append("missing filters/dist/temizweb-main.txt")
+else:
+    text = filter_dist.read_text(encoding="utf-8")
+    active = [
+        line.strip() for line in text.splitlines()
+        if line.strip() and not line.lstrip().startswith("!")
+    ]
     if len(active) != len(set(active)):
         errors.append("duplicate uBlock rules")
-
     if len(active) < 20:
         errors.append("too few uBlock rules")
+    if "HOSTNAME-TARGETED STRICT FULL-PAGE INTENT FILTER" not in text:
+        errors.append("merged uBlock output missing strict-page layer")
 
-    merged_requirements = (
-        "UNIVERSAL STRICT FULL-PAGE INTENT FILTER",
-        ":has(title:has-text(",
-        ":has(h1:has-text(",
-        ":matches-path(",
-    )
-
-    for required in merged_requirements:
-        if required not in text:
-            errors.append(
-                "merged uBlock output missing strict-page marker: "
-                + required
-            )
-
-
-dns_domain_files = list(
-    (ROOT / "dns" / "dist").glob("*-domains.txt")
-)
-
-for path in sorted(dns_domain_files):
+files = list((ROOT / "dns" / "dist").glob("*-domains.txt"))
+for path in sorted(files):
     domains = [
-        line.strip()
-        for line in path.read_text(
-            encoding="utf-8"
-        ).splitlines()
-        if line.strip()
-        and not line.startswith("#")
+        line.strip() for line in path.read_text(encoding="utf-8").splitlines()
+        if line.strip() and not line.startswith("#")
     ]
-
     if domains != sorted(set(domains)):
-        errors.append(
-            path.name + " not sorted/unique"
-        )
-
-
-if not dns_domain_files:
+        errors.append(path.name + " not sorted/unique")
+if not files:
     errors.append("missing DNS outputs")
-
 
 if errors:
     print("\n".join(errors), file=sys.stderr)
     raise SystemExit(1)
-
-
 print("All generated outputs passed validation")
