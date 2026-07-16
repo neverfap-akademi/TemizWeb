@@ -106,12 +106,107 @@ DIRECT = (
 )
 
 RECOVERY = (
-    r"porno(?:grafi)?\s+ba[ğg][ıi]ml[ıi]l[ıi][ğg][ıi]", r"pornoyu\s+b[ıi]rak",
-    r"porno\s+izlemeyi\s+b[ıi]rak", r"pornodan\s+kurtul", r"porno.{0,30}tedavi",
-    r"pornografinin\s+zararlar[ıi]", r"porno\s+engelleme", r"porn(?:ography)?\s+addiction",
-    r"quit\s+porn", r"stop\s+watching\s+porn", r"porn(?:ography)?\s+recovery",
-    r"porn.{0,30}treatment", r"harms\s+of\s+pornography", r"porn\s+blocker",
-    r"block\s+adult\s+content", r"pornography\s+research",
+    # Direct Turkish recovery language
+    r"porno(?:grafi)?\s+ba[ğg][ıi]ml[ıi]l[ıi][ğg][ıi](?:ndan)?",
+    r"porno(?:grafi)?\s+ba[ğg][ıi]ml[ıi]l[ıi][ğg][ıi]\s+tedavi(?:si)?",
+    r"porno(?:grafi)?\s+ba[ğg][ıi]ml[ıi]l[ıi][ğg][ıi]ndan\s+kurtul",
+    r"pornoyu\s+b[ıi]rak(?:mak|ma|maya|t[ıi]m)?",
+    r"pornografiyi\s+b[ıi]rak(?:mak|ma|maya|t[ıi]m)?",
+    r"porno\s+izlemeyi\s+b[ıi]rak(?:mak|ma|maya|t[ıi]m)?",
+    r"porno\s+izlemekten\s+vazge[cç](?:mek|me)",
+    r"pornodan\s+kurtul(?:mak|ma|maya)?",
+    r"pornografiden\s+kurtul(?:mak|ma|maya)?",
+    r"porno.{0,45}(?:tedavi|terapi|iyile[şs]me|rehabilitasyon)",
+    r"(?:tedavi|terapi|iyile[şs]me).{0,45}porno",
+    r"pornografinin\s+zararlar[ıi]",
+    r"porno(?:grafi)?\s+(?:engelleme|filtresi|filtreleme|bloklama)",
+    r"cinsel\s+i[cç]erik(?:ler)?(?:i|ten)?.{0,100}"
+    r"(?:b[ıi]rak|vazge[cç]|kurtul|uzak\s+dur|izleme)",
+    r"(?:b[ıi]rak|vazge[cç]|kurtul|uzak\s+dur).{0,100}"
+    r"cinsel\s+i[cç]erik",
+    r"cinsel\s+i[cç]erik(?:li)?\s+video(?:lar[ıi])?\s+izlemekten\s+vazge[cç]",
+    r"m[üu]stehcen\s+i[cç]erik(?:ler)?(?:i|ten)?.{0,100}"
+    r"(?:b[ıi]rak|vazge[cç]|kurtul|uzak\s+dur|izleme)",
+    r"pmo\s+(?:ba[ğg][ıi]ml[ıi]l[ıi][ğg][ıi]|iyile[şs]me|kurtulma|recovery|tedavi)",
+    r"(?:pmo|porno).{0,60}(?:n[üu]ks|relapse|yeniden\s+ba[şs]lama)",
+    r"(?:n[üu]ks|relapse).{0,60}(?:pmo|porno)",
+
+    # Recovery communities / established terminology
+    r"never\s*fap",
+    r"neverfap",
+    r"no\s*fap",
+    r"nofap",
+    r"porn\s*free",
+    r"pornfree",
+    r"reboot(?:ing)?",
+
+    # English recovery language
+    r"porn(?:ography)?\s+addiction",
+    r"quit(?:ting)?\s+porn(?:ography)?",
+    r"stop(?:ping)?\s+watching\s+porn(?:ography)?",
+    r"stop(?:ping)?\s+viewing\s+sexual\s+content",
+    r"give\s+up\s+porn(?:ography)?",
+    r"overcome\s+porn(?:ography)?",
+    r"break\s+(?:a\s+)?porn\s+habit",
+    r"freedom\s+from\s+porn(?:ography)?",
+    r"recover(?:y|ing)?\s+from\s+porn(?:ography)?",
+    r"porn(?:ography)?\s+recovery",
+    r"pmo\s+recovery",
+    r"porn.{0,45}(?:treatment|therapy|recovery|rehab|healing)",
+    r"(?:treatment|therapy|recovery|healing).{0,45}porn",
+    r"harms?\s+of\s+pornography",
+    r"porn\s+blocker",
+    r"block\s+(?:porn|adult|sexual)\s+content",
+    r"pornography\s+research",
+    r"sexual\s+content.{0,100}(?:quit|stop|avoid|recovery|addiction)",
+    r"(?:quit|stop|avoid|recovery).{0,100}sexual\s+content",
+)
+
+
+# High-confidence recovery signals that are safe enough to override strict
+# full-page blocking when they occur anywhere in the rendered page content.
+# These are intentionally narrower than the full RECOVERY vocabulary.
+BODY_RECOVERY_STANDALONE = (
+    r"never\s*fap",
+    r"neverfap",
+    r"no\s*fap",
+    r"nofap",
+    r"pmo\s+recovery",
+    r"porn(?:ography)?\s+recovery",
+    r"porn(?:ography)?\s+addiction",
+    r"porno(?:grafi)?\s+ba[ğg][ıi]ml[ıi]l[ıi][ğg][ıi]",
+    r"pornoyu\s+b[ıi]rak",
+    r"pornografiyi\s+b[ıi]rak",
+    r"porno\s+izlemeyi\s+b[ıi]rak",
+    r"pornodan\s+kurtul",
+    r"pornografiden\s+kurtul",
+    r"quit(?:ting)?\s+porn(?:ography)?",
+    r"stop(?:ping)?\s+watching\s+porn(?:ography)?",
+    r"recover(?:y|ing)?\s+from\s+porn(?:ography)?",
+    r"freedom\s+from\s+porn(?:ography)?",
+    r"porn\s*free",
+    r"pornfree",
+)
+
+# Broader recovery words are only safe when they occur near a PMO/content
+# subject. This protects subtle articles without making generic occurrences
+# of words such as "treatment" or "addiction" a global bypass.
+BODY_RECOVERY_SUBJECT = (
+    r"porno", r"pornografi", r"porn", r"pornography", r"pmo",
+    r"cinsel\s+i[cç]erik", r"sexual\s+content",
+    r"m[üu]stehcen\s+i[cç]erik", r"adult\s+content",
+)
+
+BODY_RECOVERY_ACTION = (
+    r"ba[ğg][ıi]ml[ıi]l[ıi]k", r"addiction",
+    r"b[ıi]rak(?:mak|ma|maya|t[ıi]m)?", r"quit(?:ting)?",
+    r"vazge[cç](?:mek|me)", r"stop(?:ping)?",
+    r"kurtul(?:mak|ma|maya)?", r"overcome",
+    r"tedavi(?:si)?", r"treatment", r"therapy", r"terapi",
+    r"iyile[şs]me", r"recovery", r"healing", r"rehab",
+    r"n[üu]ks", r"relapse", r"reboot(?:ing)?",
+    r"engelleme", r"filtreleme", r"blocker", r"avoid",
+    r"uzak\s+dur", r"temiz\s+kal", r"porn\s*free",
 )
 
 ABUSE = (
@@ -237,6 +332,47 @@ def build_pattern_families():
     return text, protected, urls
 
 
+def build_url_protected():
+    """Build URL/path recovery exceptions, including encoded Turkish forms."""
+    recovery_subject = encoded_group((
+        "porno", "pornografi", "porn", "pornography", "pmo",
+        "cinsel içerik", "cinsel icerik", "sexual content",
+        "müstehcen içerik", "mustehcen icerik",
+    ))
+    recovery_action = encoded_group((
+        "bırak", "birak", "bırakmak", "birakmak", "bırakma", "birakma",
+        "vazgeç", "vazgec", "vazgeçmek", "vazgecmek",
+        "kurtul", "kurtulmak", "tedavi", "tedavisi", "terapi",
+        "iyileşme", "iyilesme", "bağımlılık", "bagimlilik",
+        "engelleme", "filtreleme", "nüks", "nuks", "relapse",
+        "recovery", "quit", "stop watching", "treatment", "therapy",
+        "healing", "addiction", "blocker", "avoid",
+    ))
+    recovery_brand = encoded_group((
+        "neverfap", "never fap", "nofap", "no fap", "pornfree",
+        "porn free", "pmo recovery", "reboot", "rebooting",
+    ))
+
+    return alt((
+        recovery_brand,
+        rf"{recovery_subject}.{{0,260}}{recovery_action}",
+        rf"{recovery_action}.{{0,260}}{recovery_subject}",
+    ))
+
+
+
+def build_body_recovery_override():
+    """Return a body-wide recovery override for supported hostnames."""
+    standalone = alt(BODY_RECOVERY_STANDALONE)
+    subject = alt(BODY_RECOVERY_SUBJECT)
+    action = alt(BODY_RECOVERY_ACTION)
+    contextual = alt((
+        rf"{subject}.{{0,180}}{action}",
+        rf"{action}.{{0,180}}{subject}",
+    ))
+    return alt((standalone, contextual))
+
+
 def build_patterns():
     text, protected, urls = build_pattern_families()
     return alt(tuple(text.values())), protected, alt(tuple(urls.values()))
@@ -251,6 +387,8 @@ def run_regression_tests():
     compiled = {k: re.compile(v, re.I) for k, v in text.items()}
     url_compiled = {k: re.compile(v, re.I) for k, v in urls.items()}
     protected_re = re.compile(protected, re.I)
+    url_protected_re = re.compile(build_url_protected(), re.I)
+    body_recovery_re = re.compile(build_body_recovery_override(), re.I)
 
     block = (
         "seksi kız", "seksi kızlar", "seksi kiz", "seksi kizlar",
@@ -272,6 +410,14 @@ def run_regression_tests():
         "intikam pornosu mağdur desteği", "ifşa mağduru hukuki yardım",
         "özel görüntülerin yayılması suçu", "intimate image abuse support",
         "revenge porn law", "porn recovery", "pornography addiction treatment",
+        "pornoyu bırakmak", "porno tedavisi", "pornodan kurtulmak",
+        "neverfap", "pmo recovery",
+        "cinsel içerikler videoları izlemekten vazgeçmek",
+        "cinsel içerik izlemeyi bırakma", "porno bağımlılığından kurtulma",
+        "Pornonun ıstırabı üzerine bir yazı. Bu bağımlılık insanı tüketiyor.",
+        "Başlık tetikleyici olabilir ama içerik NeverFap yaklaşımını anlatıyor.",
+        "Bu yazıda pornografiden kurtulma ve nüks önleme ele alınıyor.",
+        "Sexual content can be destructive; this article discusses addiction recovery.",
     )
     url_block = (
         "search?q=seksi+k%C4%B1z", "search?q=seksi+kiz", "search?q=hot+girl",
@@ -282,6 +428,10 @@ def run_regression_tests():
     url_allow = (
         "search?q=if%C5%9Fa+k%C4%B1z+haberleri", "search?q=ifsa+kiz+haberleri",
         "search?q=hot+weather", "search?q=kadin+bilim+insanlari",
+        "search?q=pornoyu+b%C4%B1rakmak", "search?q=porno+tedavisi",
+        "search?q=pornodan+kurtulmak", "search?q=neverfap",
+        "search?q=pmo+recovery",
+        "search?q=cinsel+i%C3%A7erik+izlemekten+vazge%C3%A7mek",
     )
 
     failures = []
@@ -295,26 +445,51 @@ def run_regression_tests():
         if not any(rx.search(value) for rx in url_compiled.values()):
             failures.append(f"Expected URL BLOCK: {value!r}")
     for value in url_allow:
-        if any(rx.search(value) for rx in url_compiled.values()):
+        effective_url_block = (
+            any(rx.search(value) for rx in url_compiled.values())
+            and not url_protected_re.search(value)
+        )
+        if effective_url_block:
             failures.append(f"Expected URL ALLOW: {value!r}")
+    body_recovery_cases = (
+        "Pornonun ıstırabı. Bağımlılık döngüsünü kırmak mümkündür.",
+        "NeverFap topluluğu iyileşme sürecine destek olur.",
+        "Cinsel içerik izlemekten vazgeçmek ve temiz kalmak.",
+        "Porn addiction recovery and relapse prevention.",
+    )
+    for value in body_recovery_cases:
+        if not body_recovery_re.search(value):
+            failures.append(f"Expected BODY RECOVERY OVERRIDE: {value!r}")
     if failures:
         raise RuntimeError("Strict-page regression failures:\n- " + "\n- ".join(failures))
     print(f"Strict-page regression tests passed: {len(block)} block text, {len(allow)} allow text, {len(url_block)} block URLs, {len(url_allow)} allow URLs")
 
 
-def guards(protected):
+def guards(protected, body_recovery):
+    """Protect recovery/legal intent in intent signals and meaningful page content."""
     return (
+        f":not(:has(body:has-text(/{body_recovery}/iu)))"
         f":not(:has(title:has-text(/{protected}/iu)))"
         f":not(:has(h1:has-text(/{protected}/iu)))"
         f":not(:has(h2:has-text(/{protected}/iu)))"
         f":not(:has([role=\"heading\"]:has-text(/{protected}/iu)))"
+        f":not(:has(input[type=\"search\"]:watch-attr(value):matches-attr(value=/{protected}/iu)))"
+        f":not(:has(input[name=\"q\"]:watch-attr(value):matches-attr(value=/{protected}/iu)))"
+        f":not(:has(input[role=\"searchbox\"]:watch-attr(value):matches-attr(value=/{protected}/iu)))"
+        f":not(:has(textarea[name=\"q\"]:has-text(/{protected}/iu)))"
+        f":not(:has(textarea[name=\"q\"]:watch-attr(value):matches-attr(value=/{protected}/iu)))"
+        f":not(:has([role=\"combobox\"]:has-text(/{protected}/iu)))"
+        f":not(:has([role=\"combobox\"]:watch-attr(aria-label):matches-attr(aria-label=/{protected}/iu)))"
+        f":not(:has([role=\"search\"]:has-text(/{protected}/iu)))"
     )
 
 
 def generate_strict_page(output_path=DEFAULT_OUTPUT):
     run_regression_tests()
     text, protected, urls = build_pattern_families()
-    protection = guards(protected)
+    body_recovery = build_body_recovery_override()
+    protection = guards(protected, body_recovery)
+    url_protected = build_url_protected()
     rules = []
 
     for group_name, hosts in HOST_GROUPS.items():
@@ -324,7 +499,11 @@ def generate_strict_page(output_path=DEFAULT_OUTPUT):
                 selector = signal.format(pattern=pattern)
                 rules.append((f"{group_name}/{family_name}/DOM", f"{prefix}##html:has({selector}){protection} > body"))
         for family_name, pattern in urls.items():
-            rules.append((f"{group_name}/{family_name}/URL", f"{prefix}##html:matches-path(/{pattern}/i){protection} > body"))
+            rules.append((
+                f"{group_name}/{family_name}/URL",
+                f"{prefix}##html:matches-path(/{pattern}/i)"
+                f":not(:matches-path(/{url_protected}/i)){protection} > body",
+            ))
 
     lines = [
         "! =============================================================================",
