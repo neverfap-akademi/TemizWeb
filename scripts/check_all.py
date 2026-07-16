@@ -1,19 +1,134 @@
 #!/usr/bin/env python3
+
 from pathlib import Path
-import re,sys
-ROOT=Path(__file__).resolve().parents[1]; errors=[]
-f=ROOT/'filters/dist/temizweb-main.txt'
-if not f.exists(): errors.append('missing filters/dist/temizweb-main.txt')
+
+import sys
+
+
+ROOT = Path(__file__).resolve().parents[1]
+errors: list[str] = []
+
+filter_dist = ROOT / "filters" / "dist" / "temizweb-main.txt"
+strict_source = ROOT / "filters" / "src" / "35-strict-page.txt"
+
+
+if not strict_source.exists():
+    errors.append(
+        "missing generated filters/src/35-strict-page.txt"
+    )
 else:
- t=f.read_text(encoding='utf-8');
- for h in ('! Title:','! Version:','! License:','! Expires:'):
-  if h not in t: errors.append('missing '+h)
- active=[x.strip() for x in t.splitlines() if x.strip() and not x.lstrip().startswith('!')]
- if len(active)!=len(set(active)): errors.append('duplicate uBlock rules')
- if len(active)<20: errors.append('too few uBlock rules')
-for p in sorted((ROOT/'dns/dist').glob('*-domains.txt')):
- ds=[x.strip() for x in p.read_text(encoding='utf-8').splitlines() if x.strip() and not x.startswith('#')]
- if ds!=sorted(set(ds)): errors.append(p.name+' not sorted/unique')
-if not list((ROOT/'dns/dist').glob('*-domains.txt')): errors.append('missing DNS outputs')
-if errors: print('\n'.join(errors),file=sys.stderr); raise SystemExit(1)
-print('All generated outputs passed validation')
+    strict_text = strict_source.read_text(encoding="utf-8")
+
+    strict_requirements = (
+        "UNIVERSAL STRICT FULL-PAGE INTENT FILTER",
+        ":has(title:has-text(",
+        ":has(h1:has-text(",
+        ":matches-path(",
+        "ifşa",
+        "ifsa",
+        "leaked",
+        "çıplak",
+        "ciplak",
+        "nude",
+        "hot",
+        "sexy",
+        "intikam",
+        "victim",
+        "mağdur",
+        "porn recovery",
+    )
+
+    for required in strict_requirements:
+        if required not in strict_text:
+            errors.append(
+                "strict-page source missing: " + required
+            )
+
+    active_strict = [
+        line.strip()
+        for line in strict_text.splitlines()
+        if line.strip()
+        and not line.lstrip().startswith("!")
+    ]
+
+    if len(active_strict) != 3:
+        errors.append(
+            "strict-page source must contain exactly "
+            f"3 active generated rules, found {len(active_strict)}"
+        )
+
+
+if not filter_dist.exists():
+    errors.append(
+        "missing filters/dist/temizweb-main.txt"
+    )
+else:
+    text = filter_dist.read_text(encoding="utf-8")
+
+    for header in (
+        "! Title:",
+        "! Version:",
+        "! License:",
+        "! Expires:",
+    ):
+        if header not in text:
+            errors.append("missing " + header)
+
+    active = [
+        line.strip()
+        for line in text.splitlines()
+        if line.strip()
+        and not line.lstrip().startswith("!")
+    ]
+
+    if len(active) != len(set(active)):
+        errors.append("duplicate uBlock rules")
+
+    if len(active) < 20:
+        errors.append("too few uBlock rules")
+
+    merged_requirements = (
+        "UNIVERSAL STRICT FULL-PAGE INTENT FILTER",
+        ":has(title:has-text(",
+        ":has(h1:has-text(",
+        ":matches-path(",
+    )
+
+    for required in merged_requirements:
+        if required not in text:
+            errors.append(
+                "merged uBlock output missing strict-page marker: "
+                + required
+            )
+
+
+dns_domain_files = list(
+    (ROOT / "dns" / "dist").glob("*-domains.txt")
+)
+
+for path in sorted(dns_domain_files):
+    domains = [
+        line.strip()
+        for line in path.read_text(
+            encoding="utf-8"
+        ).splitlines()
+        if line.strip()
+        and not line.startswith("#")
+    ]
+
+    if domains != sorted(set(domains)):
+        errors.append(
+            path.name + " not sorted/unique"
+        )
+
+
+if not dns_domain_files:
+    errors.append("missing DNS outputs")
+
+
+if errors:
+    print("\n".join(errors), file=sys.stderr)
+    raise SystemExit(1)
+
+
+print("All generated outputs passed validation")
