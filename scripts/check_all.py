@@ -17,31 +17,34 @@ if not strict_source.exists():
         "missing generated filters/src/35-strict-page.txt"
     )
 else:
-    strict_text = strict_source.read_text(encoding="utf-8")
+    strict_text = strict_source.read_text(
+        encoding="utf-8"
+    )
 
     strict_requirements = (
         "UNIVERSAL STRICT FULL-PAGE INTENT FILTER",
         ":has(title:has-text(",
         ":has(h1:has-text(",
+        ":has(h2:has-text(",
+        ":has(h3:has-text(",
+        "[role=\"heading\"]",
+        "meta[property=\"og:title\"]",
+        "meta[name=\"twitter:title\"]",
+        "meta[name=\"description\"]",
+        "input[type=\"search\"]",
+        "input[name=\"q\"]",
+        "input[role=\"searchbox\"]",
+        "[data-query]",
+        "[data-search-query]",
+        "[role=\"search\"]",
         ":matches-path(",
-        "ifşa",
-        "ifsa",
-        "leaked",
-        "çıplak",
-        "ciplak",
-        "nude",
-        "hot",
-        "sexy",
-        "intikam",
-        "victim",
-        "mağdur",
-        r"porn\s+recovery",
     )
 
     for required in strict_requirements:
         if required not in strict_text:
             errors.append(
-                "strict-page source missing: " + required
+                "strict-page source missing signal: "
+                + required
             )
 
     active_strict = [
@@ -51,10 +54,38 @@ else:
         and not line.lstrip().startswith("!")
     ]
 
-    if len(active_strict) != 3:
+    if len(active_strict) < 12:
         errors.append(
-            "strict-page source must contain exactly "
-            f"3 active generated rules, found {len(active_strict)}"
+            "strict-page source has too few active "
+            f"signal rules: {len(active_strict)}"
+        )
+
+    try:
+        page_risk, protected, url_risk = (
+            build_patterns()
+        )
+
+        if not page_risk:
+            errors.append(
+                "strict-page risk pattern is empty"
+            )
+
+        if not protected:
+            errors.append(
+                "strict-page protected pattern is empty"
+            )
+
+        if not url_risk:
+            errors.append(
+                "strict-page URL pattern is empty"
+            )
+
+        run_regression_tests()
+
+    except Exception as exc:
+        errors.append(
+            "strict-page regression failure: "
+            + str(exc)
         )
 
 
