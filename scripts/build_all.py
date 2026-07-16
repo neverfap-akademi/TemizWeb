@@ -1,9 +1,16 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 from pathlib import Path
+
 from urllib.request import Request, urlopen
 from urllib.error import URLError, HTTPError
-import argparse, ipaddress, re, time
+
+import argparse
+import ipaddress
+import re
+import time
+
+from generate_strict_page import generate_strict_page
 
 ROOT=Path(__file__).resolve().parents[1]
 FILTER_SRC=ROOT/'filters'/'src'
@@ -129,7 +136,11 @@ def main():
             f"Too few upstream domains derived from adblock: {len(adult)}"
         )
 
-    parts=[p.read_text(encoding='utf-8').rstrip() for p in sorted(FILTER_SRC.glob('*.txt'))]
+    rstrip() for p in sorted(FILT
+    parts = [
+        path.read_text(encoding="utf-8").rstrip()
+        for path in sorted(FILTER_SRC.glob("*.txt"))
+    ]
     merged='\n\n'.join(parts)+'\n\n! Upstream: HaGeZi NSFW (GPL-3.0)\n'+'\n'.join(dict.fromkeys(external_rules))+'\n'
     FILTER_DIST.parent.mkdir(parents=True,exist_ok=True); FILTER_DIST.write_text(merged,encoding='utf-8')
 
