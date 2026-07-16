@@ -35,7 +35,7 @@ else:
         "intikam",
         "victim",
         "mağdur",
-        "porn recovery",
+        r"porn\s+recovery",
     )
 
     for required in strict_requirements:
