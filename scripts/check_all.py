@@ -4,6 +4,11 @@ from pathlib import Path
 
 import sys
 
+from generate_strict_page import (
+    build_patterns,
+    run_regression_tests,
+)
+
 
 ROOT = Path(__file__).resolve().parents[1]
 errors: list[str] = []
