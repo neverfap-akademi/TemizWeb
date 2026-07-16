@@ -124,7 +124,7 @@ def main():
             domain
             for line in domain_text.splitlines()
             if (domain := normalize_domain(line))
-        }
+
         }
         if len(fixture_domains) < minimum:
             raise RuntimeError(
