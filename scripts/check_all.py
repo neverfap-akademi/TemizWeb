@@ -14,10 +14,11 @@ if not strict_source.exists():
 else:
     strict_text = strict_source.read_text(encoding="utf-8")
     requirements = (
-        "HOSTNAME-TARGETED STRICT FULL-PAGE INTENT FILTER",
+        "COMPACT HOSTNAME-TARGETED STRICT FULL-PAGE FILTER",
         "nitter.net", "ok.ru", "shutterstock.com", "pixabay.com",
-        "textarea[name=\"q\"]", "input[name=\"q\"]",
-        ":matches-path(", ":watch-attr(value)",
+        'textarea[name="q"]', 'input[name="q"]',
+        ":matches-path(", ":watch-attr(value)", "#?#",
+        ":upward(html)", ":not(:has-text(",
     )
     for required in requirements:
         if required not in strict_text:
@@ -27,8 +28,15 @@ else:
         line.strip() for line in strict_text.splitlines()
         if line.strip() and not line.lstrip().startswith("!")
     ]
-    if len(active) < 100:
+    if len(active) < 150:
         errors.append(f"strict-page source has too few focused rules: {len(active)}")
+
+    overlong = [len(line) for line in active if len(line) > 12000]
+    if overlong:
+        errors.append(
+            "strict-page source contains overlong uBlock rules; "
+            f"longest is {max(overlong)} characters"
+        )
 
     try:
         page_risk, protected, url_risk = build_patterns()
@@ -50,8 +58,24 @@ else:
         errors.append("duplicate uBlock rules")
     if len(active) < 20:
         errors.append("too few uBlock rules")
-    if "HOSTNAME-TARGETED STRICT FULL-PAGE INTENT FILTER" not in text:
+    if "COMPACT HOSTNAME-TARGETED STRICT FULL-PAGE FILTER" not in text:
         errors.append("merged uBlock output missing strict-page layer")
+
+    generic_rules = [
+        line for line in text.splitlines()
+        if line.startswith("*##") and ":has-text(" in line
+    ]
+    if generic_rules:
+        missing_recovery_guard = [
+            line for line in generic_rules
+            if r"never\s*fap" not in line
+            or r"pornoyu\s+b[ıi]rak" not in line
+        ]
+        if missing_recovery_guard:
+            errors.append(
+                "generic content rules missing shared PMO recovery override: "
+                f"{len(missing_recovery_guard)} rule(s)"
+            )
 
 files = list((ROOT / "dns" / "dist").glob("*-domains.txt"))
 for path in sorted(files):

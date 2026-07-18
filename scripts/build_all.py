@@ -9,7 +9,7 @@ from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
-from generate_strict_page import generate_strict_page
+from generate_strict_page import build_safe_pattern, generate_strict_page
 
 ROOT = Path(__file__).resolve().parents[1]
 FILTER_SRC = ROOT / "filters" / "src"
@@ -85,6 +85,34 @@ def write_dns(name: str, domains: set[str]):
     )
 
 
+
+def protect_generic_content(text: str) -> str:
+    """Add the shared recovery override to generic card/article rules.
+
+    Strict-page protection only prevents a whole-page hide. The older generic
+    content layer can still hide the article element itself. This function
+    adds the same high-confidence recovery/legal/education exception to every
+    active procedural cosmetic rule in 40-generic-content.txt, without
+    modifying the source file on disk.
+    """
+    safe = build_safe_pattern()
+    guard = f":not(:has-text(/{safe}/iu))"
+    output = []
+
+    for line in text.splitlines():
+        stripped = line.strip()
+        if (
+            stripped
+            and not stripped.startswith("!")
+            and "##" in stripped
+            and ":has-text(" in stripped
+            and guard not in stripped
+        ):
+            line = line + guard
+        output.append(line)
+
+    return "\n".join(output)
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--fixture-dir", type=Path)
@@ -129,10 +157,12 @@ def main():
 
     generate_strict_page(FILTER_SRC / "35-strict-page.txt")
 
-    parts = [
-        path.read_text(encoding="utf-8").rstrip()
-        for path in sorted(FILTER_SRC.glob("*.txt"))
-    ]
+    parts = []
+    for path in sorted(FILTER_SRC.glob("*.txt")):
+        text = path.read_text(encoding="utf-8").rstrip()
+        if path.name == "40-generic-content.txt":
+            text = protect_generic_content(text)
+        parts.append(text)
     merged = (
         "\n\n".join(parts)
         + "\n\n! Upstream: HaGeZi NSFW (GPL-3.0)\n"
