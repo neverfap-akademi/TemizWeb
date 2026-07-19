@@ -41,86 +41,129 @@ m.youtube.com##.ytp-endscreen-content
 ! and publishing. Removes passive feeds and algorithmic discovery.
 ! =============================================================================
 
-! Rule 1: YouTube desktop homepage feed
+! Rule 1: Allow desktop Shorts cards outside feeds
+youtube.com#@#ytd-rich-item-renderer:has(a[href^="/shorts/"])
 
-! Rule 2: YouTube desktop what-to-watch feed
+! Rule 2: Allow desktop Shorts search results
+youtube.com#@#ytd-video-renderer:has(a[href^="/shorts/"])
+
+! Rule 3: Allow desktop channel Shorts items
+youtube.com#@#ytd-reel-item-renderer
+
+! Rule 4: Allow mobile Shorts cards outside feeds
+m.youtube.com#@#ytm-rich-item-renderer:has(a[href*="/shorts/"])
+
+! Rule 5: Allow mobile Shorts search results
+m.youtube.com#@#ytm-video-with-context-renderer:has(a[href*="/shorts/"])
+
+! Rule 6: Allow mobile channel Shorts items
+m.youtube.com#@#ytm-reel-item-renderer
+
+! Rule 7: Restore Instagram Explore/Search link exact
+instagram.com#@#a[href="/explore/"]
+
+! Rule 8: Restore Instagram Explore/Search link prefix
+instagram.com#@#a[href^="/explore/"]
+
+! Rule 9: YouTube desktop root homepage rich grid
+youtube.com##ytd-rich-grid-renderer:matches-path(/^[/](?:[?].*)?$/)
+
+! Rule 10: YouTube desktop root homepage browse results
+youtube.com##ytd-two-column-browse-results-renderer:matches-path(/^[/](?:[?].*)?$/) ytd-rich-grid-renderer
+
+! Rule 11: YouTube desktop what-to-watch feed
 youtube.com##ytd-browse[browse-id="FEwhat_to_watch"] ytd-rich-grid-renderer
 
-! Rule 3: YouTube desktop Shorts navigation
+! Rule 12: YouTube desktop Shorts navigation
 youtube.com##ytd-guide-entry-renderer:has(a[href^="/shorts"]),ytd-mini-guide-entry-renderer:has(a[href^="/shorts"])
 
-! Rule 4: YouTube desktop homepage Shorts shelves
-youtube.com##ytd-browse[page-subtype="home"] ytd-reel-shelf-renderer,ytd-browse[page-subtype="home"] ytd-rich-section-renderer:has(a[href^="/shorts/"] )
+! Rule 13: YouTube desktop homepage Shorts shelves
+youtube.com##ytd-reel-shelf-renderer:matches-path(/^[/](?:[?].*)?$/),ytd-rich-section-renderer:matches-path(/^[/](?:[?].*)?$/):has(a[href^="/shorts/"])
 
-! Rule 5: YouTube desktop subscriptions Shorts shelves
-youtube.com##ytd-browse[browse-id="FEsubscriptions"] ytd-reel-shelf-renderer,ytd-browse[browse-id="FEsubscriptions"] ytd-rich-section-renderer:has(a[href^="/shorts/"] )
+! Rule 14: YouTube desktop subscriptions Shorts shelves
+youtube.com##ytd-browse[browse-id="FEsubscriptions"] ytd-reel-shelf-renderer,ytd-browse[browse-id="FEsubscriptions"] ytd-rich-section-renderer:has(a[href^="/shorts/"])
 
-! Rule 6: YouTube desktop watch-next recommendations
+! Rule 15: YouTube desktop watch-next recommendations
 
-! Rule 7: YouTube desktop endscreen recommendations
+! Rule 16: YouTube desktop endscreen recommendations
 
-! Rule 8: YouTube mobile homepage feed
+! Rule 17: YouTube mobile root homepage rich grid
+m.youtube.com##ytm-rich-grid-renderer:matches-path(/^[/](?:[?].*)?$/)
+
+! Rule 18: YouTube mobile what-to-watch feed
 m.youtube.com##ytm-browse[tab-identifier="FEwhat_to_watch"] ytm-rich-grid-renderer,ytm-browse[browse-id="FEwhat_to_watch"] ytm-rich-grid-renderer
 
-! Rule 9: YouTube mobile Shorts navigation
-m.youtube.com##ytm-pivot-bar-item-renderer:has(a[href*="/shorts"]),ytm-guide-entry-renderer:has(a[href*="/shorts"] )
+! Rule 19: YouTube mobile Shorts navigation
+m.youtube.com##ytm-pivot-bar-item-renderer:has(a[href*="/shorts"]),ytm-guide-entry-renderer:has(a[href*="/shorts"])
 
-! Rule 10: YouTube mobile homepage Shorts shelves
-m.youtube.com##ytm-browse[tab-identifier="FEwhat_to_watch"] ytm-reel-shelf-renderer,ytm-browse[browse-id="FEwhat_to_watch"] ytm-reel-shelf-renderer
+! Rule 20: YouTube mobile homepage Shorts shelves
+m.youtube.com##ytm-reel-shelf-renderer:matches-path(/^[/](?:[?].*)?$/),ytm-browse[tab-identifier="FEwhat_to_watch"] ytm-reel-shelf-renderer,ytm-browse[browse-id="FEwhat_to_watch"] ytm-reel-shelf-renderer
 
-! Rule 11: YouTube mobile subscriptions Shorts shelves
+! Rule 21: YouTube mobile subscriptions Shorts shelves
 m.youtube.com##ytm-browse[browse-id="FEsubscriptions"] ytm-reel-shelf-renderer
 
-! Rule 12: YouTube mobile related recommendations
+! Rule 22: YouTube mobile related recommendations
 
-! Rule 13: YouTube mobile endscreen recommendations
+! Rule 23: YouTube mobile endscreen recommendations
 
-! Rule 14: Instagram homepage posts
-instagram.com##article:matches-path(/^\/(?:\?.*)?$/)
+! Rule 24: Instagram homepage posts
+instagram.com##article:matches-path(/^[/](?:[?].*)?$/)
 
-! Rule 15: Instagram homepage story tray
-instagram.com##main section:matches-path(/^\/(?:\?.*)?$/):has(canvas)
+! Rule 25: Instagram homepage story tray
+instagram.com##main section:matches-path(/^[/](?:[?].*)?$/):has(canvas)
 
-! Rule 16: Instagram homepage suggested modules
-instagram.com##main section:matches-path(/^\/(?:\?.*)?$/):has-text(/(?:Suggested for you|Suggestions for you|For you|Önerilenler|Senin için)/i)
+! Rule 26: Instagram homepage suggested modules
+instagram.com##main section:matches-path(/^[/](?:[?].*)?$/):has-text(/(?:Suggested for you|Suggestions for you|For you|Önerilenler|Senin için)/i)
 
-! Rule 17: Instagram Explore discovery grid
-instagram.com##main section:matches-path(/^\/explore\/?(?:\?.*)?$/)
+! Rule 27: Instagram Explore post tiles
+instagram.com##main a[href^="/p/"]:matches-path(/^[/]explore(?:[/].*)?(?:[?].*)?$/)
 
-! Rule 18: Instagram Reels navigation
+! Rule 28: Instagram Explore reel tiles
+instagram.com##main a[href^="/reel/"]:matches-path(/^[/]explore(?:[/].*)?(?:[?].*)?$/)
+
+! Rule 29: Instagram Explore recommendation images
+instagram.com##main a[href^="/explore/"] img:matches-path(/^[/]explore(?:[/].*)?(?:[?].*)?$/)
+
+! Rule 30: Instagram Reels navigation
 instagram.com##a[href="/reels/"]
 
-! Rule 19: Instagram Reels endless feed
-instagram.com##main:matches-path(/^\/reels\/?(?:\?.*)?$/)
+! Rule 31: Instagram Reels endless feed
+instagram.com##main:matches-path(/^[/]reels[/]?(?:[?].*)?$/)
 
-! Rule 20: X home timeline tweets
-x.com##article[data-testid="tweet"]:matches-path(/^\/home(?:\?.*)?$/)
+! Rule 32: X home tab strip
+x.com##div[role="tablist"]:matches-path(/^[/]home(?:[?].*)?$/)
 
-! Rule 21: Twitter home timeline tweets
-twitter.com##article[data-testid="tweet"]:matches-path(/^\/home(?:\?.*)?$/)
+! Rule 33: Twitter home tab strip
+twitter.com##div[role="tablist"]:matches-path(/^[/]home(?:[?].*)?$/)
 
-! Rule 22: X home timeline cells
-x.com##div[data-testid="cellInnerDiv"]:matches-path(/^\/home(?:\?.*)?$/):has(article[data-testid="tweet"])
+! Rule 34: X home timeline tweets
+x.com##article[data-testid="tweet"]:matches-path(/^[/]home(?:[?].*)?$/)
 
-! Rule 23: Twitter home timeline cells
-twitter.com##div[data-testid="cellInnerDiv"]:matches-path(/^\/home(?:\?.*)?$/):has(article[data-testid="tweet"])
+! Rule 35: Twitter home timeline tweets
+twitter.com##article[data-testid="tweet"]:matches-path(/^[/]home(?:[?].*)?$/)
 
-! Rule 24: X Explore discovery content
-x.com##main section:matches-path(/^\/explore(?:\/.*)?(?:\?.*)?$/):not(:has([data-testid="SearchBox_Search_Input"]))
+! Rule 36: X home timeline cells
+x.com##div[data-testid="cellInnerDiv"]:matches-path(/^[/]home(?:[?].*)?$/):has(article[data-testid="tweet"])
 
-! Rule 25: Twitter Explore discovery content
-twitter.com##main section:matches-path(/^\/explore(?:\/.*)?(?:\?.*)?$/):not(:has([data-testid="SearchBox_Search_Input"]))
+! Rule 37: Twitter home timeline cells
+twitter.com##div[data-testid="cellInnerDiv"]:matches-path(/^[/]home(?:[?].*)?$/):has(article[data-testid="tweet"])
 
-! Rule 26: X trends sidebar
+! Rule 38: X Explore discovery content
+x.com##main section:matches-path(/^[/]explore(?:[/].*)?(?:[?].*)?$/):not(:has([data-testid="SearchBox_Search_Input"]))
+
+! Rule 39: Twitter Explore discovery content
+twitter.com##main section:matches-path(/^[/]explore(?:[/].*)?(?:[?].*)?$/):not(:has([data-testid="SearchBox_Search_Input"]))
+
+! Rule 40: X trends sidebar
 x.com##aside:has-text(/(?:What’s happening|What's happening|Trends for you|Gündemdekiler|İlgini çekebilecek gündemler)/i)
 
-! Rule 27: Twitter trends sidebar
+! Rule 41: Twitter trends sidebar
 twitter.com##aside:has-text(/(?:What’s happening|What's happening|Trends for you|Gündemdekiler|İlgini çekebilecek gündemler)/i)
 
-! Rule 28: X who-to-follow sidebar
+! Rule 42: X who-to-follow sidebar
 x.com##aside:has-text(/(?:Who to follow|Kimi takip etmeli)/i)
 
-! Rule 29: Twitter who-to-follow sidebar
+! Rule 43: Twitter who-to-follow sidebar
 twitter.com##aside:has-text(/(?:Who to follow|Kimi takip etmeli)/i)
 
 ! =============================================================================
