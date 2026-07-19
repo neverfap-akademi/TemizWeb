@@ -64,28 +64,64 @@ ADDICTION_RULES = (
     # ------------------------------------------------------------------
     # The global Shorts entry button is removed. Shorts content is hidden only
     # on the root homepage; channel tabs, search results and direct Shorts work.
-    ("YouTube desktop root homepage rich grid", 'youtube.com##ytd-rich-grid-renderer:matches-path(/^[/](?:[?].*)?$/)'),
-    ("YouTube desktop root homepage browse results", 'youtube.com##ytd-two-column-browse-results-renderer:matches-path(/^[/](?:[?].*)?$/) ytd-rich-grid-renderer'),
-    ("YouTube desktop homepage Shorts shelves", 'youtube.com#?#ytd-rich-section-renderer:matches-path(/^[/](?:[?].*)?$/):has(a[href^="/shorts/"])'),
-    ("YouTube desktop homepage reel shelves", 'youtube.com##ytd-reel-shelf-renderer:matches-path(/^[/](?:[?].*)?$/)'),
-    ("YouTube desktop what-to-watch feed", 'youtube.com##ytd-browse[browse-id="FEwhat_to_watch"] ytd-rich-grid-renderer'),
-    ("YouTube desktop Shorts navigation", 'youtube.com##ytd-guide-entry-renderer:has(a[href^="/shorts"]),ytd-mini-guide-entry-renderer:has(a[href^="/shorts"])'),
-    ("YouTube desktop watch-next recommendations", 'youtube.com##ytd-watch-next-secondary-results-renderer'),
-    ("YouTube desktop endscreen recommendations", 'youtube.com##.ytp-endscreen-content'),
-    ("YouTube mobile root homepage rich grid", 'm.youtube.com##ytm-rich-grid-renderer:matches-path(/^[/](?:[?].*)?$/)'),
-    ("YouTube mobile homepage Shorts shelves", 'm.youtube.com##ytm-reel-shelf-renderer:matches-path(/^[/](?:[?].*)?$/)'),
-    ("YouTube mobile homepage Shorts lockups", 'm.youtube.com##ytm-shorts-lockup-view-model:matches-path(/^[/](?:[?].*)?$/)'),
-    ("YouTube mobile what-to-watch feed", 'm.youtube.com##ytm-browse[tab-identifier="FEwhat_to_watch"] ytm-rich-grid-renderer,ytm-browse[browse-id="FEwhat_to_watch"] ytm-rich-grid-renderer'),
-    ("YouTube mobile Shorts navigation", 'm.youtube.com##ytm-pivot-bar-item-renderer:has(a[href*="/shorts"]),ytm-guide-entry-renderer:has(a[href*="/shorts"])'),
-    ("YouTube mobile related recommendations", 'm.youtube.com##ytm-item-section-renderer:has(ytm-compact-video-renderer)'),
-    ("YouTube mobile endscreen recommendations", 'm.youtube.com##.ytp-endscreen-content'),
+    (
+        "YouTube desktop home page-subtype feed",
+        'youtube.com##ytd-browse[page-subtype="home"] ytd-rich-grid-renderer',
+    ),
+    (
+        "YouTube desktop root homepage rich grid",
+        'youtube.com#?#ytd-rich-grid-renderer:matches-path(/^[/](?:[?].*)?$/)',
+    ),
+    (
+        "YouTube desktop root homepage browse results",
+        'youtube.com#?#ytd-two-column-browse-results-renderer:matches-path(/^[/](?:[?].*)?$/) ytd-rich-grid-renderer',
+    ),
+    (
+        "YouTube desktop homepage Shorts shelves",
+        'youtube.com#?#ytd-rich-section-renderer:matches-path(/^[/](?:[?].*)?$/):has(a[href^="/shorts/"])',
+    ),
+    (
+        "YouTube desktop homepage reel shelves",
+        'youtube.com#?#ytd-reel-shelf-renderer:matches-path(/^[/](?:[?].*)?$/)',
+    ),
+    (
+        "YouTube desktop what-to-watch feed",
+        'youtube.com##ytd-browse[browse-id="FEwhat_to_watch"] ytd-rich-grid-renderer',
+    ),
+    (
+        "YouTube desktop Shorts guide navigation",
+        'youtube.com#?#ytd-guide-entry-renderer:has(a[href^="/shorts"]),'
+        'ytd-mini-guide-entry-renderer:has(a[href^="/shorts"])',
+    ),
+    (
+        "YouTube desktop Shorts titled navigation",
+        'youtube.com#?#ytd-guide-entry-renderer:has(a[title="Shorts"]),'
+        'ytd-mini-guide-entry-renderer:has(a[title="Shorts"]),'
+        'ytd-guide-entry-renderer:has(a[aria-label="Shorts"]),'
+        'ytd-mini-guide-entry-renderer:has(a[aria-label="Shorts"])',
+    ),
+    (
+        "YouTube desktop watch-next recommendations",
+        'youtube.com##ytd-watch-next-secondary-results-renderer',
+    ),
+    (
+        "YouTube desktop endscreen recommendations",
+        'youtube.com##.ytp-endscreen-content',
+    ),
 
     # ------------------------------------------------------------------
     # Instagram — search UI remains; passive content and loaders disappear
     # ------------------------------------------------------------------
     # Hide the whole passive homepage canvas immediately. Instagram's Search
     # sidebar/dialog lives outside this main surface in current Firefox builds.
-    ("Instagram root passive main surface", 'instagram.com##main:matches-path(/^[/](?:[?].*)?$/)'),
+    (
+        "Instagram root homepage post articles",
+        'instagram.com#?#main:matches-path(/^[/](?:[?].*)?$/) article',
+    ),
+    (
+        "Instagram root homepage feed sections",
+        'instagram.com#?#main:matches-path(/^[/](?:[?].*)?$/) section:has(article)',
+    ),
 
     # Suggested modules are removed at their containing section, including the
     # header, posts and spinner. Multiple structures cover current layouts.
@@ -94,11 +130,26 @@ ADDICTION_RULES = (
 
     # On Explore/Search, leave the search sidebar and input intact while hiding
     # result/recommendation media and persistent loading indicators in main.
-    ("Instagram Explore post tiles", 'instagram.com##main a[href^="/p/"]:matches-path(/^[/]explore(?:[/].*)?(?:[?].*)?$/)'),
-    ("Instagram Explore reel tiles", 'instagram.com##main a[href^="/reel/"]:matches-path(/^[/]explore(?:[/].*)?(?:[?].*)?$/)'),
-    ("Instagram Explore recommendation images", 'instagram.com##main a[href^="/explore/"] img:matches-path(/^[/]explore(?:[/].*)?(?:[?].*)?$/)'),
-    ("Instagram Explore loading indicators", 'instagram.com##main [role="progressbar"]:matches-path(/^[/]explore(?:[/].*)?(?:[?].*)?$/)'),
-    ("Instagram root loading indicators", 'instagram.com##main [role="progressbar"]:matches-path(/^[/](?:[?].*)?$/)'),
+    (
+        "Instagram Explore post tiles",
+        'instagram.com#?#main a[href^="/p/"]:matches-path(/^[/]explore(?:[/].*)?(?:[?].*)?$/)',
+    ),
+    (
+        "Instagram Explore reel tiles",
+        'instagram.com#?#main a[href^="/reel/"]:matches-path(/^[/]explore(?:[/].*)?(?:[?].*)?$/)',
+    ),
+    (
+        "Instagram Explore recommendation images",
+        'instagram.com#?#main a[href^="/explore/"] img:matches-path(/^[/]explore(?:[/].*)?(?:[?].*)?$/)',
+    ),
+    (
+        "Instagram Explore loading indicators",
+        'instagram.com#?#main [role="progressbar"]:matches-path(/^[/]explore(?:[/].*)?(?:[?].*)?$/)',
+    ),
+    (
+        "Instagram root loading indicators",
+        'instagram.com#?#main [role="progressbar"]:matches-path(/^[/](?:[?].*)?$/)',
+    ),
     ("Instagram Reels navigation", 'instagram.com##a[href="/reels/"]'),
     ("Instagram Reels endless feed", 'instagram.com##main:matches-path(/^[/]reels[/]?(?:[?].*)?$/)'),
 
