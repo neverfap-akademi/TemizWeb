@@ -77,109 +77,98 @@ instagram.com#@#a[href="/explore/"]
 ! Rule 12: Restore Instagram Explore/Search link prefix
 instagram.com#@#a[href^="/explore/"]
 
-! Rule 13: YouTube desktop root homepage rich grid
-youtube.com##ytd-rich-grid-renderer:matches-path(/^[/](?:[?].*)?$/)
+! Rule 13: YouTube desktop home page-subtype feed
 
-! Rule 14: YouTube desktop root homepage browse results
-youtube.com##ytd-two-column-browse-results-renderer:matches-path(/^[/](?:[?].*)?$/) ytd-rich-grid-renderer
+! Rule 14: YouTube desktop root homepage rich grid
+youtube.com#?#ytd-rich-grid-renderer:matches-path(/^[/](?:[?].*)?$/)
 
-! Rule 15: YouTube desktop homepage Shorts shelves
+! Rule 15: YouTube desktop root homepage browse results
+youtube.com#?#ytd-two-column-browse-results-renderer:matches-path(/^[/](?:[?].*)?$/) ytd-rich-grid-renderer
+
+! Rule 16: YouTube desktop homepage Shorts shelves
 youtube.com#?#ytd-rich-section-renderer:matches-path(/^[/](?:[?].*)?$/):has(a[href^="/shorts/"])
 
-! Rule 16: YouTube desktop homepage reel shelves
-youtube.com##ytd-reel-shelf-renderer:matches-path(/^[/](?:[?].*)?$/)
+! Rule 17: YouTube desktop homepage reel shelves
+youtube.com#?#ytd-reel-shelf-renderer:matches-path(/^[/](?:[?].*)?$/)
 
-! Rule 17: YouTube desktop what-to-watch feed
+! Rule 18: YouTube desktop what-to-watch feed
 youtube.com##ytd-browse[browse-id="FEwhat_to_watch"] ytd-rich-grid-renderer
 
-! Rule 18: YouTube desktop Shorts navigation
-youtube.com##ytd-guide-entry-renderer:has(a[href^="/shorts"]),ytd-mini-guide-entry-renderer:has(a[href^="/shorts"])
+! Rule 19: YouTube desktop Shorts guide navigation
+youtube.com#?#ytd-guide-entry-renderer:has(a[href^="/shorts"]),ytd-mini-guide-entry-renderer:has(a[href^="/shorts"])
 
-! Rule 19: YouTube desktop watch-next recommendations
+! Rule 20: YouTube desktop Shorts titled navigation
+youtube.com#?#ytd-guide-entry-renderer:has(a[title="Shorts"]),ytd-mini-guide-entry-renderer:has(a[title="Shorts"]),ytd-guide-entry-renderer:has(a[aria-label="Shorts"]),ytd-mini-guide-entry-renderer:has(a[aria-label="Shorts"])
 
-! Rule 20: YouTube desktop endscreen recommendations
+! Rule 21: YouTube desktop watch-next recommendations
 
-! Rule 21: YouTube mobile root homepage rich grid
-m.youtube.com##ytm-rich-grid-renderer:matches-path(/^[/](?:[?].*)?$/)
+! Rule 22: YouTube desktop endscreen recommendations
 
-! Rule 22: YouTube mobile homepage Shorts shelves
-m.youtube.com##ytm-reel-shelf-renderer:matches-path(/^[/](?:[?].*)?$/)
+! Rule 23: Instagram root homepage post articles
+instagram.com#?#main:matches-path(/^[/](?:[?].*)?$/) article
 
-! Rule 23: YouTube mobile homepage Shorts lockups
-m.youtube.com##ytm-shorts-lockup-view-model:matches-path(/^[/](?:[?].*)?$/)
+! Rule 24: Instagram root homepage feed sections
+instagram.com#?#main:matches-path(/^[/](?:[?].*)?$/) section:has(article)
 
-! Rule 24: YouTube mobile what-to-watch feed
-m.youtube.com##ytm-browse[tab-identifier="FEwhat_to_watch"] ytm-rich-grid-renderer,ytm-browse[browse-id="FEwhat_to_watch"] ytm-rich-grid-renderer
-
-! Rule 25: YouTube mobile Shorts navigation
-m.youtube.com##ytm-pivot-bar-item-renderer:has(a[href*="/shorts"]),ytm-guide-entry-renderer:has(a[href*="/shorts"])
-
-! Rule 26: YouTube mobile related recommendations
-
-! Rule 27: YouTube mobile endscreen recommendations
-
-! Rule 28: Instagram root passive main surface
-instagram.com##main:matches-path(/^[/](?:[?].*)?$/)
-
-! Rule 29: Instagram suggested section
+! Rule 25: Instagram suggested section
 instagram.com#?#main section:has-text(/(?:Suggested for you|Suggestions for you|For you|Önerilenler|Senin için(?: önerilenler)?)/i)
 
-! Rule 30: Instagram suggested parent container
+! Rule 26: Instagram suggested parent container
 instagram.com#?#main div:has(> div span:has-text(/^(?:Suggested for you|Suggestions for you|For you|Önerilenler|Senin için(?: önerilenler)?)$/i)):upward(2)
 
-! Rule 31: Instagram Explore post tiles
-instagram.com##main a[href^="/p/"]:matches-path(/^[/]explore(?:[/].*)?(?:[?].*)?$/)
+! Rule 27: Instagram Explore post tiles
+instagram.com#?#main a[href^="/p/"]:matches-path(/^[/]explore(?:[/].*)?(?:[?].*)?$/)
 
-! Rule 32: Instagram Explore reel tiles
-instagram.com##main a[href^="/reel/"]:matches-path(/^[/]explore(?:[/].*)?(?:[?].*)?$/)
+! Rule 28: Instagram Explore reel tiles
+instagram.com#?#main a[href^="/reel/"]:matches-path(/^[/]explore(?:[/].*)?(?:[?].*)?$/)
 
-! Rule 33: Instagram Explore recommendation images
-instagram.com##main a[href^="/explore/"] img:matches-path(/^[/]explore(?:[/].*)?(?:[?].*)?$/)
+! Rule 29: Instagram Explore recommendation images
+instagram.com#?#main a[href^="/explore/"] img:matches-path(/^[/]explore(?:[/].*)?(?:[?].*)?$/)
 
-! Rule 34: Instagram Explore loading indicators
-instagram.com##main [role="progressbar"]:matches-path(/^[/]explore(?:[/].*)?(?:[?].*)?$/)
+! Rule 30: Instagram Explore loading indicators
+instagram.com#?#main [role="progressbar"]:matches-path(/^[/]explore(?:[/].*)?(?:[?].*)?$/)
 
-! Rule 35: Instagram root loading indicators
-instagram.com##main [role="progressbar"]:matches-path(/^[/](?:[?].*)?$/)
+! Rule 31: Instagram root loading indicators
+instagram.com#?#main [role="progressbar"]:matches-path(/^[/](?:[?].*)?$/)
 
-! Rule 36: Instagram Reels navigation
+! Rule 32: Instagram Reels navigation
 instagram.com##a[href="/reels/"]
 
-! Rule 37: Instagram Reels endless feed
+! Rule 33: Instagram Reels endless feed
 instagram.com##main:matches-path(/^[/]reels[/]?(?:[?].*)?$/)
 
-! Rule 38: X Home navigation button
+! Rule 34: X Home navigation button
 x.com##a[data-testid="AppTabBar_Home_Link"]
 
-! Rule 39: Twitter Home navigation button
+! Rule 35: Twitter Home navigation button
 twitter.com##a[data-testid="AppTabBar_Home_Link"]
 
-! Rule 40: X Home primary column
+! Rule 36: X Home primary column
 x.com##div[data-testid="primaryColumn"]:matches-path(/^[/]home(?:[?].*)?$/)
 
-! Rule 41: Twitter Home primary column
+! Rule 37: Twitter Home primary column
 twitter.com##div[data-testid="primaryColumn"]:matches-path(/^[/]home(?:[?].*)?$/)
 
-! Rule 42: X Home fallback main region
+! Rule 38: X Home fallback main region
 x.com##main[role="main"]:matches-path(/^[/]home(?:[?].*)?$/)
 
-! Rule 43: Twitter Home fallback main region
+! Rule 39: Twitter Home fallback main region
 twitter.com##main[role="main"]:matches-path(/^[/]home(?:[?].*)?$/)
 
-! Rule 44: X Explore discovery content
+! Rule 40: X Explore discovery content
 x.com##main section:matches-path(/^[/]explore(?:[/].*)?(?:[?].*)?$/):not(:has([data-testid="SearchBox_Search_Input"]))
 
-! Rule 45: Twitter Explore discovery content
+! Rule 41: Twitter Explore discovery content
 twitter.com##main section:matches-path(/^[/]explore(?:[/].*)?(?:[?].*)?$/):not(:has([data-testid="SearchBox_Search_Input"]))
 
-! Rule 46: X trends sidebar
+! Rule 42: X trends sidebar
 x.com##aside:has-text(/(?:What’s happening|What's happening|Trends for you|Gündemdekiler|İlgini çekebilecek gündemler)/i)
 
-! Rule 47: Twitter trends sidebar
+! Rule 43: Twitter trends sidebar
 twitter.com##aside:has-text(/(?:What’s happening|What's happening|Trends for you|Gündemdekiler|İlgini çekebilecek gündemler)/i)
 
-! Rule 48: X who-to-follow sidebar
+! Rule 44: X who-to-follow sidebar
 x.com##aside:has-text(/(?:Who to follow|Kimi takip etmeli)/i)
 
-! Rule 49: Twitter who-to-follow sidebar
+! Rule 45: Twitter who-to-follow sidebar
 twitter.com##aside:has-text(/(?:Who to follow|Kimi takip etmeli)/i)
