@@ -11,6 +11,8 @@ Policy:
 - Remove passive endless feeds and algorithmic discovery surfaces.
 - Filter PMO-risk cards/posts/videos during intentional browsing while
   preserving recovery, legal-help, victim-support and educational material.
+- Block strongly PMO-risky social-media search queries in PMO/main mode,
+  while preserving recovery, legal-help and educational queries.
 """
 
 from __future__ import annotations
@@ -546,11 +548,102 @@ def _content_rule(
     return f"{host}#?#{chain}"
 
 
+def build_social_search_query_rules() -> list[tuple[str, str]]:
+    """Block strongly PMO-risky searches on supported social platforms.
+
+    These rules inspect the search field value itself instead of relying
+    only on result-card titles.
+
+    They are generated into 25-social-content.txt, so they appear in:
+    - temizweb-pmo.txt
+    - temizweb-main.txt
+
+    They do not appear in temizweb-social.txt.
+
+    Recovery, legal-help, victim-support and educational queries remain
+    allowed through the shared SAFE pattern.
+    """
+
+    families = build_pattern_families()
+    safe = build_safe_pattern()
+    rules: list[tuple[str, str]] = []
+
+    search_inputs = {
+        "youtube.com": (
+            "input#search",
+            'input[name="search_query"]',
+            'input[aria-label="Search"]',
+            'input[aria-label="Ara"]',
+        ),
+        "m.youtube.com": (
+            "input#search",
+            'input[name="search_query"]',
+            "input.searchbox-input",
+            'input[aria-label="Search"]',
+            'input[aria-label="Ara"]',
+        ),
+        "instagram.com": (
+            'input[placeholder="Search"]',
+            'input[placeholder="Ara"]',
+            'input[aria-label="Search input"]',
+            'input[aria-label="Arama girişi"]',
+            'input[aria-label="Search"]',
+            'input[aria-label="Ara"]',
+        ),
+        "x.com": (
+            'input[data-testid="SearchBox_Search_Input"]',
+            'input[placeholder="Search"]',
+            'input[placeholder="Ara"]',
+            'input[aria-label="Search query"]',
+            'input[aria-label="Arama sorgusu"]',
+        ),
+        "twitter.com": (
+            'input[data-testid="SearchBox_Search_Input"]',
+            'input[placeholder="Search"]',
+            'input[placeholder="Ara"]',
+            'input[aria-label="Search query"]',
+            'input[aria-label="Arama sorgusu"]',
+        ),
+    }
+
+    for host, selectors in search_inputs.items():
+        for selector in selectors:
+            for family_name, patterns in families.items():
+                chain = (
+                    f"{selector}:watch-attr(value)"
+                )
+
+                for pattern in patterns:
+                    chain += (
+                        f":matches-attr(value=/{pattern}/iu)"
+                    )
+
+                chain += (
+                    f":not(:matches-attr(value=/{safe}/iu))"
+                )
+
+                chain += (
+                    ":upward(html) > body"
+                )
+
+                rules.append(
+                    (
+                        (
+                            f"{host} / search query / "
+                            f"{family_name}"
+                        ),
+                        f"{host}#?#{chain}",
+                    )
+                )
+
+    return rules
+
+
 def generate_social_layers(
     addiction_output: Path = ADDICTION_OUTPUT,
     content_output: Path = CONTENT_OUTPUT,
 ) -> tuple[Path, Path]:
-    """Generate both social anti-addiction and social PMO layers."""
+    """Generate social anti-addiction and social PMO layers."""
 
     addiction_lines = [
         (
@@ -608,8 +701,8 @@ def generate_social_layers(
             "edit scripts/generate_social.py instead."
         ),
         (
-            "! Filters the smallest post/video card while "
-            "preserving normal accounts."
+            "! Filters strong PMO search queries and the smallest "
+            "matching post/video card."
         ),
         (
             "! Account cards use a separate, much higher "
@@ -628,6 +721,34 @@ def generate_social_layers(
 
     count = 0
 
+    # ------------------------------------------------------------------
+    # Strong social-media search-query filtering
+    # ------------------------------------------------------------------
+    #
+    # These rules are written to the PMO content layer, not to the
+    # anti-addiction-only layer.
+    #
+    social_search_rules = (
+        build_social_search_query_rules()
+    )
+
+    for label, rule in social_search_rules:
+        count += 1
+
+        content_lines.extend(
+            (
+                (
+                    f"! Rule {count}: "
+                    f"Social search:{label}"
+                ),
+                rule,
+                "",
+            )
+        )
+
+    # ------------------------------------------------------------------
+    # Individual post/video/card filtering
+    # ------------------------------------------------------------------
     for host, selectors in SOCIAL_TARGETS.items():
         for selector in selectors:
             for family_name, patterns in families.items():
@@ -653,6 +774,9 @@ def generate_social_layers(
                     )
                 )
 
+    # ------------------------------------------------------------------
+    # Strong explicit account-identity filtering
+    # ------------------------------------------------------------------
     account_families = (
         build_account_identity_families()
     )
