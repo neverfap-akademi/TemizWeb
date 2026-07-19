@@ -87,30 +87,6 @@ def write_dns(name: str, domains: set[str]):
 
 
 
-
-def deduplicate_filter_text(text: str) -> str:
-    """Remove duplicate active uBlock rules while preserving comments/order.
-
-    Generated social layers can intentionally supersede older handwritten
-    rules that remain in filters/src. Keep the first occurrence so source
-    ordering and exception priority stay stable, but preserve every comment
-    and blank line for readability and attribution.
-    """
-    seen: set[str] = set()
-    output: list[str] = []
-
-    for line in text.splitlines():
-        stripped = line.strip()
-        if not stripped or stripped.startswith("!"):
-            output.append(line)
-            continue
-        if stripped in seen:
-            continue
-        seen.add(stripped)
-        output.append(line)
-
-    return "\n".join(output).rstrip() + "\n"
-
 def protect_generic_content(text: str) -> str:
     """Add the shared recovery override to generic card/article rules.
 
@@ -198,7 +174,6 @@ def main():
         + "\n".join(dict.fromkeys(external_rules))
         + "\n"
     )
-    merged = deduplicate_filter_text(merged)
     FILTER_DIST.parent.mkdir(parents=True, exist_ok=True)
     FILTER_DIST.write_text(merged, encoding="utf-8")
 
