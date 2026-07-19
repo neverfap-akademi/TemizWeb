@@ -52,21 +52,29 @@ ADDICTION_RULES = (
     ("Allow mobile Shorts rich cards", 'm.youtube.com#@#ytm-rich-item-renderer:has(a[href*="/shorts/"])'),
     ("Allow mobile Shorts search results", 'm.youtube.com#@#ytm-video-with-context-renderer:has(a[href*="/shorts/"])'),
     ("Allow mobile Shorts channel items", 'm.youtube.com#@#ytm-reel-item-renderer'),
+    ("Allow desktop Shorts shelves outside homepage", 'youtube.com#@#ytd-rich-section-renderer:has(a[href^="/shorts/"])'),
+    ("Allow mobile Shorts lockups outside homepage", 'm.youtube.com#@#ytm-shorts-lockup-view-model'),
+    ("Restore YouTube Subscriptions navigation", 'youtube.com#@#ytd-guide-entry-renderer:has(a[href^="/feed/subscriptions"]),ytd-mini-guide-entry-renderer:has(a[href^="/feed/subscriptions"])'),
+    ("Restore mobile YouTube Subscriptions navigation", 'm.youtube.com#@#ytm-pivot-bar-item-renderer:has(a[href*="/feed/subscriptions"]),ytm-guide-entry-renderer:has(a[href*="/feed/subscriptions"])'),
     ("Restore Instagram Explore/Search link exact", 'instagram.com#@#a[href="/explore/"]'),
     ("Restore Instagram Explore/Search link prefix", 'instagram.com#@#a[href^="/explore/"]'),
 
     # ------------------------------------------------------------------
-    # YouTube — allow all Shorts content; hide only Shorts entry buttons
+    # YouTube — homepage Shorts removed; channel/search/direct Shorts allowed
     # ------------------------------------------------------------------
-    # Homepage and recommendation feeds remain removed, but Shorts shelves,
-    # searched Shorts, channel Shorts and direct Shorts URLs are all allowed.
+    # The global Shorts entry button is removed. Shorts content is hidden only
+    # on the root homepage; channel tabs, search results and direct Shorts work.
     ("YouTube desktop root homepage rich grid", 'youtube.com##ytd-rich-grid-renderer:matches-path(/^[/](?:[?].*)?$/)'),
     ("YouTube desktop root homepage browse results", 'youtube.com##ytd-two-column-browse-results-renderer:matches-path(/^[/](?:[?].*)?$/) ytd-rich-grid-renderer'),
+    ("YouTube desktop homepage Shorts shelves", 'youtube.com#?#ytd-rich-section-renderer:matches-path(/^[/](?:[?].*)?$/):has(a[href^="/shorts/"])'),
+    ("YouTube desktop homepage reel shelves", 'youtube.com##ytd-reel-shelf-renderer:matches-path(/^[/](?:[?].*)?$/)'),
     ("YouTube desktop what-to-watch feed", 'youtube.com##ytd-browse[browse-id="FEwhat_to_watch"] ytd-rich-grid-renderer'),
     ("YouTube desktop Shorts navigation", 'youtube.com##ytd-guide-entry-renderer:has(a[href^="/shorts"]),ytd-mini-guide-entry-renderer:has(a[href^="/shorts"])'),
     ("YouTube desktop watch-next recommendations", 'youtube.com##ytd-watch-next-secondary-results-renderer'),
     ("YouTube desktop endscreen recommendations", 'youtube.com##.ytp-endscreen-content'),
     ("YouTube mobile root homepage rich grid", 'm.youtube.com##ytm-rich-grid-renderer:matches-path(/^[/](?:[?].*)?$/)'),
+    ("YouTube mobile homepage Shorts shelves", 'm.youtube.com##ytm-reel-shelf-renderer:matches-path(/^[/](?:[?].*)?$/)'),
+    ("YouTube mobile homepage Shorts lockups", 'm.youtube.com##ytm-shorts-lockup-view-model:matches-path(/^[/](?:[?].*)?$/)'),
     ("YouTube mobile what-to-watch feed", 'm.youtube.com##ytm-browse[tab-identifier="FEwhat_to_watch"] ytm-rich-grid-renderer,ytm-browse[browse-id="FEwhat_to_watch"] ytm-rich-grid-renderer'),
     ("YouTube mobile Shorts navigation", 'm.youtube.com##ytm-pivot-bar-item-renderer:has(a[href*="/shorts"]),ytm-guide-entry-renderer:has(a[href*="/shorts"])'),
     ("YouTube mobile related recommendations", 'm.youtube.com##ytm-item-section-renderer:has(ytm-compact-video-renderer)'),
@@ -169,8 +177,16 @@ def build_account_identity_families() -> dict[str, tuple[str, ...]]:
     Account cards require either a direct explicit identity or three distinct
     signal families. This is intentionally stricter than post/card filtering.
     """
+    nsfw_identity = r"(?:nsfw|18\+|adult\s+content|yeti[şs]kin\s+i[cç]erik)"
     return {
         "direct_identity": (alt(DIRECT),),
+        # Account identity is stronger evidence than one ordinary post. Names or
+        # bios such as “seksi kızlar” and “nude women” are sufficient here.
+        "sexualized_person": (alt(SEXUALIZED), alt(PEOPLE)),
+        "nudity_person": (alt(NUDITY), alt(PEOPLE)),
+        "leak_person": (alt(LEAK), alt(PEOPLE)),
+        "nsfw_media": (nsfw_identity, alt(MEDIA)),
+        # Three-signal forms remain for indirect or noisy account descriptions.
         "leak_person_media": (alt(LEAK), alt(PEOPLE), alt(MEDIA)),
         "nudity_person_media": (alt(NUDITY), alt(PEOPLE), alt(MEDIA)),
         "sexualized_person_media": (alt(SEXUALIZED), alt(PEOPLE), alt(MEDIA)),
