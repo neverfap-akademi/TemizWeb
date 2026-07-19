@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>TemizWeb Filtresini Kur</title>
+  <meta name="description" content="TemizWeb filtre aboneliğini uBlock Origin'e ekleyin.">
+  <style>
+    :root {
+      --bg: #f6faf8;
+      --panel: #ffffff;
+      --text: #17211d;
+      --muted: #5d6a64;
+      --border: #d7e1dc;
+      --primary: #176b52;
+      --primary-dark: #10513e;
+      --primary-soft: #eaf7f2;
+      --warning-bg: #fff8e7;
+      --warning-border: #e8ce86;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      line-height: 1.55;
+    }
+
+    main {
+      width: min(720px, calc(100% - 32px));
+      margin: 40px auto;
+    }
+
+    .panel {
+      padding: 30px;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: var(--panel);
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: clamp(30px, 6vw, 44px);
+      line-height: 1.1;
+    }
+
+    p {
+      margin: 0;
+    }
+
+    .lead {
+      color: var(--muted);
+      font-size: 18px;
+    }
+
+    .selection {
+      margin-top: 24px;
+      padding: 18px;
+      border-radius: 14px;
+      background: var(--primary-soft);
+    }
+
+    .selection strong {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--primary-dark);
+      font-size: 18px;
+    }
+
+    .button {
+      display: flex;
+      width: 100%;
+      min-height: 56px;
+      margin-top: 20px;
+      align-items: center;
+      justify-content: center;
+      padding: 14px 18px;
+      border: 0;
+      border-radius: 14px;
+      background: var(--primary);
+      color: #ffffff;
+      text-align: center;
+      text-decoration: none;
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    .button:hover,
+    .button:focus {
+      background: var(--primary-dark);
+    }
+
+    .secondary {
+      border: 1px solid var(--primary);
+      background: transparent;
+      color: var(--primary-dark);
+    }
+
+    .secondary:hover,
+    .secondary:focus {
+      background: var(--primary-soft);
+    }
+
+    .steps {
+      display: grid;
+      gap: 12px;
+      margin-top: 24px;
+      counter-reset: step;
+    }
+
+    .step {
+      position: relative;
+      padding: 15px 15px 15px 52px;
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      counter-increment: step;
+    }
+
+    .step::before {
+      content: counter(step);
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      display: flex;
+      width: 26px;
+      height: 26px;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: var(--primary);
+      color: #ffffff;
+      font-weight: 700;
+    }
+
+    .step strong {
+      display: block;
+      margin-bottom: 3px;
+    }
+
+    .step span {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .warning {
+      margin-top: 20px;
+      padding: 15px;
+      border: 1px solid var(--warning-border);
+      border-radius: 13px;
+      background: var(--warning-bg);
+      font-size: 14px;
+    }
+
+    .small {
+      margin-top: 16px;
+      color: var(--muted);
+      font-size: 13px;
+      text-align: center;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #111715;
+        --panel: #18201d;
+        --text: #eef5f1;
+        --muted: #b7c5be;
+        --border: #34433c;
+        --primary: #2b9875;
+        --primary-dark: #66c7a5;
+        --primary-soft: #18372d;
+        --warning-bg: #332d1c;
+        --warning-border: #786533;
+      }
+    }
+
+    @media (max-width: 520px) {
+      main {
+        margin: 18px auto;
+      }
+
+      .panel {
+        padding: 21px;
+        border-radius: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="panel">
+      <h1>TemizWeb Filtresini Kur</h1>
+
+      <p class="lead">
+        Seçtiğiniz TemizWeb listesini uBlock Origin’e eklemek için
+        aşağıdaki düğmeye basın.
+      </p>
+
+      <div class="selection">
+        <strong id="filter-title">TemizWeb</strong>
+        <span id="filter-description">Filtre seçimi hazırlanıyor.</span>
+      </div>
+
+      <a id="subscribe-button" class="button" href="#">
+        uBlock Origin’e ekle
+      </a>
+
+      <a
+        class="button secondary"
+        href="https://addons.mozilla.org/tr/firefox/addon/ublock-origin/"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        uBlock Origin kurulu değilse yükle
+      </a>
+
+      <div class="steps">
+        <div class="step">
+          <strong>Firefox ve uBlock Origin kurulu olmalı</strong>
+          <span>Bu sayfayı Firefox içinde açın.</span>
+        </div>
+
+        <div class="step">
+          <strong>“uBlock Origin’e ekle” düğmesine basın</strong>
+          <span>uBlock Origin abonelik onay ekranını açacaktır.</span>
+        </div>
+
+        <div class="step">
+          <strong>Aboneliği onaylayın</strong>
+          <span>Liste daha sonra otomatik olarak güncellenir.</span>
+        </div>
+      </div>
+
+      <div id="manual-warning" class="warning hidden">
+        Düğmeye bastığınızda hiçbir şey olmazsa uBlock Origin’in kurulu
+        olduğunu ve bu sayfanın Firefox içinde açık olduğunu kontrol edin.
+      </div>
+
+      <p class="small">
+        TemizWeb SafeSearch veya YouTube Kısıtlı Mod zorlamaz.
+      </p>
+    </section>
+  </main>
+
+  <script>
+    (function () {
+      "use strict";
+
+      const filters = {
+        main: {
+          title: "TemizWeb — Tam Koruma",
+          description:
+            "PMO içerik filtresi ve sosyal medya bağımlılık filtresi birlikte kurulacak.",
+          url:
+            "https://raw.githubusercontent.com/neverfap-akademi/TemizWeb/main/filters/dist/temizweb-main.txt"
+        },
+
+        pmo: {
+          title: "TemizWeb — PMO Filtresi",
+          description:
+            "PMO içerik filtresi kurulacak. Sosyal medya bağımlılık arayüzü değişiklikleri kurulmayacak.",
+          url:
+            "https://raw.githubusercontent.com/neverfap-akademi/TemizWeb/main/filters/dist/temizweb-pmo.txt"
+        },
+
+        social: {
+          title: "TemizWeb — Sosyal Medya Filtresi",
+          description:
+            "Yalnızca sosyal medya bağımlılık yüzeylerini azaltan filtre kurulacak.",
+          url:
+            "https://raw.githubusercontent.com/neverfap-akademi/TemizWeb/main/filters/dist/temizweb-social.txt"
+        }
+      };
+
+      const params = new URLSearchParams(window.location.search);
+      const requested = params.get("filter");
+      const selected = filters[requested] || filters.main;
+
+      const title = document.getElementById("filter-title");
+      const description = document.getElementById("filter-description");
+      const button = document.getElementById("subscribe-button");
+      const warning = document.getElementById("manual-warning");
+
+      title.textContent = selected.title;
+      description.textContent = selected.description;
+
+      button.href =
+        "ubo:subscribe?location=" +
+        encodeURIComponent(selected.url) +
+        "&title=" +
+        encodeURIComponent(selected.title);
+
+      button.addEventListener("click", function () {
+        window.setTimeout(function () {
+          warning.classList.remove("hidden");
+        }, 1600);
+      });
+    })();
+  </script>
+</body>
+</html>
