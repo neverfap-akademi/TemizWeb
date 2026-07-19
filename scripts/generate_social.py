@@ -69,20 +69,27 @@ ADDICTION_RULES = (
         'youtube.com##ytd-browse[page-subtype="home"] ytd-rich-grid-renderer',
     ),
     (
+        "YouTube desktop what-to-watch browse feed",
+        'youtube.com##ytd-browse[browse-id="FEwhat_to_watch"] ytd-rich-grid-renderer',
+    ),
+    (
         "YouTube desktop root homepage rich grid",
-        'youtube.com#?#ytd-rich-grid-renderer:matches-path(/^[/](?:[?].*)?$/)',
+        'youtube.com#?#:matches-path(/^[/](?:[?].*)?$/) ytd-rich-grid-renderer',
     ),
     (
         "YouTube desktop root homepage browse results",
-        'youtube.com#?#ytd-two-column-browse-results-renderer:matches-path(/^[/](?:[?].*)?$/) ytd-rich-grid-renderer',
+        'youtube.com#?#:matches-path(/^[/](?:[?].*)?$/) '
+        'ytd-two-column-browse-results-renderer ytd-rich-grid-renderer',
     ),
     (
         "YouTube desktop homepage Shorts shelves",
-        'youtube.com#?#ytd-rich-section-renderer:matches-path(/^[/](?:[?].*)?$/):has(a[href^="/shorts/"])',
+        'youtube.com#?#:matches-path(/^[/](?:[?].*)?$/) '
+        'ytd-rich-section-renderer:has(a[href^="/shorts/"])',
     ),
     (
         "YouTube desktop homepage reel shelves",
-        'youtube.com#?#ytd-reel-shelf-renderer:matches-path(/^[/](?:[?].*)?$/)',
+        'youtube.com#?#:matches-path(/^[/](?:[?].*)?$/) '
+        'ytd-reel-shelf-renderer',
     ),
     (
         "YouTube desktop what-to-watch feed",
@@ -90,8 +97,17 @@ ADDICTION_RULES = (
     ),
     (
         "YouTube desktop Shorts guide navigation",
-        'youtube.com#?#ytd-guide-entry-renderer:has(a[href^="/shorts"]),'
-        'ytd-mini-guide-entry-renderer:has(a[href^="/shorts"])',
+        'youtube.com#?#ytd-guide-entry-renderer:has(a[href^="/shorts/"]),'
+        'ytd-guide-entry-renderer:has(a[href="/shorts"]),'
+        'ytd-mini-guide-entry-renderer:has(a[href^="/shorts/"]),'
+        'ytd-mini-guide-entry-renderer:has(a[href="/shorts"])',
+    ),
+    (
+        "YouTube desktop Shorts navigation anchors",
+        'youtube.com##ytd-guide-renderer a[href="/shorts"],'
+        'ytd-mini-guide-renderer a[href="/shorts"],'
+        'ytd-guide-renderer a[href^="/shorts/"],'
+        'ytd-mini-guide-renderer a[href^="/shorts/"]',
     ),
     (
         "YouTube desktop Shorts titled navigation",
@@ -116,39 +132,56 @@ ADDICTION_RULES = (
     # sidebar/dialog lives outside this main surface in current Firefox builds.
     (
         "Instagram root homepage post articles",
-        'instagram.com#?#main:matches-path(/^[/](?:[?].*)?$/) article',
-    ),
-    (
-        "Instagram root homepage feed sections",
-        'instagram.com#?#main:matches-path(/^[/](?:[?].*)?$/) section:has(article)',
+        'instagram.com#?#:matches-path(/^[/](?:[?].*)?$/) main article',
     ),
 
     # Suggested modules are removed at their containing section, including the
     # header, posts and spinner. Multiple structures cover current layouts.
-    ("Instagram suggested section", 'instagram.com#?#main section:has-text(/(?:Suggested for you|Suggestions for you|For you|Önerilenler|Senin için(?: önerilenler)?)/i)'),
-    ("Instagram suggested parent container", 'instagram.com#?#main div:has(> div span:has-text(/^(?:Suggested for you|Suggestions for you|For you|Önerilenler|Senin için(?: önerilenler)?)$/i)):upward(2)'),
+    (
+        "Instagram suggested post articles",
+        'instagram.com#?#main section:has-text('
+        '/(?:Suggested for you|Suggestions for you|For you|Önerilenler|'
+        'Senin için(?: önerilenler)?)/i) article',
+    ),
+    (
+        "Instagram suggested post links",
+        'instagram.com#?#main section:has-text('
+        '/(?:Suggested for you|Suggestions for you|For you|Önerilenler|'
+        'Senin için(?: önerilenler)?)/i) '
+        'a[href^="/p/"],'
+        'main section:has-text('
+        '/(?:Suggested for you|Suggestions for you|For you|Önerilenler|'
+        'Senin için(?: önerilenler)?)/i) '
+        'a[href^="/reel/"]',
+    ),
 
     # On Explore/Search, leave the search sidebar and input intact while hiding
     # result/recommendation media and persistent loading indicators in main.
     (
         "Instagram Explore post tiles",
-        'instagram.com#?#main a[href^="/p/"]:matches-path(/^[/]explore(?:[/].*)?(?:[?].*)?$/)',
+        'instagram.com#?#:matches-path(/^[/]explore(?:[/].*)?(?:[?].*)?$/) '
+        'main a[href^="/p/"]',
     ),
     (
         "Instagram Explore reel tiles",
-        'instagram.com#?#main a[href^="/reel/"]:matches-path(/^[/]explore(?:[/].*)?(?:[?].*)?$/)',
+        'instagram.com#?#:matches-path(/^[/]explore(?:[/].*)?(?:[?].*)?$/) '
+        'main a[href^="/reel/"]',
     ),
     (
         "Instagram Explore recommendation images",
-        'instagram.com#?#main a[href^="/explore/"] img:matches-path(/^[/]explore(?:[/].*)?(?:[?].*)?$/)',
+        'instagram.com#?#:matches-path(/^[/]explore(?:[/].*)?(?:[?].*)?$/) '
+        'main a[href^="/explore/"] img',
     ),
     (
         "Instagram Explore loading indicators",
-        'instagram.com#?#main [role="progressbar"]:matches-path(/^[/]explore(?:[/].*)?(?:[?].*)?$/)',
+        'instagram.com#?#:matches-path(/^[/]explore(?:[/].*)?(?:[?].*)?$/) '
+        'main [role="progressbar"]',
     ),
     (
         "Instagram root loading indicators",
-        'instagram.com#?#main [role="progressbar"]:matches-path(/^[/](?:[?].*)?$/)',
+        'instagram.com#?#:matches-path(/^[/](?:[?].*)?$/) '
+        'main [role="progressbar"]',
+    ),
     ),
     ("Instagram Reels navigation", 'instagram.com##a[href="/reels/"]'),
     ("Instagram Reels endless feed", 'instagram.com##main:matches-path(/^[/]reels[/]?(?:[?].*)?$/)'),
