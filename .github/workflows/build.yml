@@ -1,0 +1,112 @@
+name: Build TemizWeb
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 4 * * *"
+  push:
+    branches: [main]
+    paths:
+      - "filters/src/**"
+      - "dns/src/**"
+      - "scripts/**"
+      - "tests/**"
+      - ".github/workflows/build.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: temizweb-single-builder
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Offline self-test
+        run: |
+          python scripts/build_all.py --fixture-dir tests/fixtures
+          python scripts/check_all.py
+
+      - name: Build current upstream lists
+        run: |
+          python scripts/build_all.py
+          python scripts/check_all.py
+
+      - name: Commit generated outputs
+        run: |
+          set -e
+
+          # `git diff` does not report newly generated, untracked files.
+          # `git status --porcelain` detects both modified and new outputs.
+          if [ -z "$(git status --porcelain --untracked-files=all -- filters/dist dns/dist)" ]; then
+            echo "No generated changes."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          # Keep generated changes temporarily while synchronizing with main.
+          git stash push --include-untracked \
+            -- filters/dist dns/dist
+
+          git fetch origin main
+          git rebase origin/main
+
+          git stash pop || {
+            echo "Generated outputs conflicted with newer remote changes."
+            echo "Rebuilding them from the latest main branch instead."
+            git checkout --theirs -- filters/dist dns/dist 2>/dev/null || true
+            git reset -- filters/dist dns/dist 2>/dev/null || true
+          }
+
+          # Always regenerate from the newest source files after synchronization.
+          python scripts/build_all.py
+          python scripts/check_all.py
+
+          if [ -z "$(git status --porcelain --untracked-files=all -- filters/dist dns/dist)" ]; then
+            echo "No generated changes after synchronization."
+            exit 0
+          fi
+
+          git add filters/dist dns/dist
+          git commit -m "chore: refresh generated filter lists"
+
+          # A second remote commit may arrive during the build.
+          # Retry after rebasing and rebuilding from the newest main.
+          for attempt in 1 2 3; do
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+
+            echo "Push attempt ${attempt} failed; synchronizing and rebuilding."
+            git fetch origin main
+            git rebase origin/main
+            python scripts/build_all.py
+            python scripts/check_all.py
+            git add filters/dist dns/dist
+
+            if git diff --cached --quiet; then
+              echo "Remote main already contains equivalent generated outputs."
+              exit 0
+            fi
+
+            git commit --amend --no-edit
+          done
+
+          echo "Unable to push generated outputs after 3 attempts."
+          exit 1
