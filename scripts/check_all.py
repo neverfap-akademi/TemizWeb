@@ -42,10 +42,16 @@ for path, marker, requirements in (
         social_content,
         "SOCIAL PMO CONTENT FILTER",
         (
+            "youtube.com#?#input#search:watch-attr(value)",
+            "m.youtube.com#?#input#search:watch-attr(value)",
+            'instagram.com#?#input[placeholder="Search"]:watch-attr(value)',
+            'x.com#?#input[data-testid="SearchBox_Search_Input"]:watch-attr(value)',
+            'twitter.com#?#input[data-testid="SearchBox_Search_Input"]:watch-attr(value)',
             "youtube.com#?#ytd-video-renderer",
             "instagram.com#?#article",
-            "x.com#?#article[data-testid=\"tweet\"]",
+            'x.com#?#article[data-testid="tweet"]',
             ":not(:has-text(",
+            ":not(:matches-attr(value=",
         ),
     ),
 ):
