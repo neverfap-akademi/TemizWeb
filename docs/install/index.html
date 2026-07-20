@@ -909,6 +909,105 @@
         </div>
       </section>
 
+      <section
+        id="ios-section"
+        class="section hidden"
+      >
+        <h2>2. iPhone veya iPad — Safari kurulumu</h2>
+
+        <div class="notice warning">
+          <strong>iPhone/iPad kurulumu elle yapılır.</strong>
+          Safari sürümünde TemizWeb liste URL'si abonelik olarak eklenmez.
+          Seçtiğiniz filtrenin bütün içeriğini kopyalayıp uBlock Origin Lite
+          içindeki Özel filtreler alanına yapıştırmanız gerekir.
+        </div>
+
+        <div class="steps">
+          <div class="step">
+            <strong>uBlock Origin Lite'ı App Store'dan yükleyin</strong>
+            <span>
+              Uygulamayı ilk kez açtığınızda “Genişletmeye izin ver” ve
+              “Özel dolaşımda da izin ver” seçeneklerini etkinleştirin.
+            </span>
+          </div>
+
+          <div class="step">
+            <strong>İlk kurulum izinlerini geçtiyseniz Safari ayarlarını açın</strong>
+            <span>
+              iPhone veya iPad Ayarları → Uygulamalar → Safari →
+              Genişletmeler → uBlock Origin Lite. Genişletmeyi etkinleştirin,
+              gerekli Safari izinlerini verin ve
+              “Özel dolaşımda da izin ver” seçeneğini açın.
+            </span>
+          </div>
+
+          <div class="step">
+            <strong>Safari'de uBlock Origin Lite'ı açın</strong>
+            <span>
+              Safari'yi açın. Adres çubuğunun solundaki sayfa veya
+              genişletmeler simgesine basın ve uBlock Origin Lite'ı seçin.
+            </span>
+          </div>
+
+          <div class="step">
+            <strong>Sağ alttan Kontrol Paneli'ni açın</strong>
+            <span>
+              uBlock Origin Lite penceresinin sağ alt bölümündeki
+              Kontrol Paneli düğmesine basın.
+            </span>
+          </div>
+
+          <div class="step">
+            <strong>Özel filtreler bölümüne girin</strong>
+            <span>
+              Kontrol Paneli içinde Özel filtreler bölümünü açın.
+            </span>
+          </div>
+
+          <div class="step">
+            <strong>İçeri/Dışarı Aktar düğmesine basın</strong>
+            <span>
+              Aşağıdaki düğmeyle seçtiğiniz TemizWeb listesinin bütün
+              içeriğini kopyalayın. İçeri/Dışarı Aktar alanına yapıştırın
+              ve değişiklikleri uygulayın.
+            </span>
+          </div>
+        </div>
+
+        <div class="button-row">
+          <a
+            id="ios-appstore-button"
+            class="button subtle"
+            href="https://apps.apple.com/app/ublock-origin-lite/id6745342698"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            uBlock Origin Lite'ı App Store'da aç
+          </a>
+
+          <button
+            id="ios-copy-filter"
+            class="button"
+            type="button"
+          >
+            TemizWeb filtre içeriğini kopyala
+          </button>
+        </div>
+
+        <div
+          id="ios-copy-status"
+          class="notice hidden"
+          aria-live="polite"
+        ></div>
+
+        <div class="notice">
+          iPhone ve iPad'de filtre içeriği elle yapıştırıldığı için
+          TemizWeb güncellendiğinde bu işlemi yeniden yapmanız gerekir.
+          Safari'nin filtre sistemi Firefox'taki tam uBlock Origin'den
+          farklı olduğundan bazı gelişmiş kurallar çalışmayabilir.
+        </div>
+      </section>
+
       <section class="section">
         <h2 id="other-lists-heading">
           4. Diğer uBlock filtreleri
@@ -1027,6 +1126,10 @@
                   Windows
                 </option>
 
+                <option value="ios">
+                  iPhone / iPad
+                </option>
+
                 <option value="desktop">
                   Diğer masaüstü
                 </option>
@@ -1053,6 +1156,10 @@
 
                 <option value="edge">
                   Microsoft Edge
+                </option>
+
+                <option value="safari">
+                  Safari
                 </option>
 
                 <option value="other">
@@ -1135,7 +1242,10 @@
           "https://www.mozilla.org/tr/firefox/new/",
 
         firefoxAndroid:
-          "https://play.google.com/store/apps/details?id=org.mozilla.firefox"
+          "https://play.google.com/store/apps/details?id=org.mozilla.firefox",
+
+        iosUblock:
+          "https://apps.apple.com/app/ublock-origin-lite/id6745342698"
       };
 
       const params =
@@ -1241,6 +1351,26 @@
             "chromium-copy-status"
           ),
 
+        iosSection:
+          document.getElementById(
+            "ios-section"
+          ),
+
+        iosAppstoreButton:
+          document.getElementById(
+            "ios-appstore-button"
+          ),
+
+        iosCopyFilter:
+          document.getElementById(
+            "ios-copy-filter"
+          ),
+
+        iosCopyStatus:
+          document.getElementById(
+            "ios-copy-status"
+          ),
+
         otherListsHeading:
           document.getElementById(
             "other-lists-heading"
@@ -1291,6 +1421,13 @@
         const isAndroid =
           /Android/i.test(ua);
 
+        const isIOS =
+          /iPhone|iPad|iPod/i.test(ua) ||
+          (
+            /Mac/i.test(platform) &&
+            navigator.maxTouchPoints > 1
+          );
+
         const isWindows =
           /Windows/i.test(ua) ||
           /Win/i.test(platform);
@@ -1305,12 +1442,20 @@
           !isEdge &&
           /Chrome|CriOS/i.test(ua);
 
+        const isSafari =
+          isIOS &&
+          /Safari/i.test(ua) &&
+          !/CriOS|FxiOS|EdgiOS/i.test(ua);
+
         let device =
           "desktop";
 
         if (isAndroid) {
           device =
             "android";
+        } else if (isIOS) {
+          device =
+            "ios";
         } else if (isWindows) {
           device =
             "windows";
@@ -1328,6 +1473,9 @@
         } else if (isChrome) {
           browser =
             "chrome";
+        } else if (isSafari) {
+          browser =
+            "safari";
         }
 
         return {
@@ -1346,6 +1494,9 @@
 
           windows:
             "Windows",
+
+          ios:
+            "iPhone / iPad",
 
           desktop:
             "Masaüstü"
@@ -1367,6 +1518,9 @@
 
           edge:
             "Microsoft Edge",
+
+          safari:
+            "Safari",
 
           other:
             "Diğer tarayıcı"
@@ -1453,6 +1607,20 @@
           device === "android" &&
           browser === "firefox";
 
+        const isIOSSafari =
+          device === "ios" &&
+          browser === "safari";
+
+        if (isIOSSafari) {
+          elements.otherListsHeading.textContent =
+            "3. Diğer uBlock filtreleri";
+
+          elements.testHeading.textContent =
+            "4. Kurulum tamamlandı";
+
+          return;
+        }
+
         if (isAndroidFirefox) {
           elements.privateHeading.textContent =
             "3. Gizli/özel pencere izni";
@@ -1485,6 +1653,10 @@
       function renderFirefox(
         device
       ) {
+        elements.iosSection
+          .classList
+          .add("hidden");
+
         elements.guidanceContent.innerHTML =
           '<div class="choice-grid">' +
             '<div class="choice-card recommended">' +
@@ -1547,6 +1719,10 @@
       }
 
       function renderAndroidNonFirefox() {
+        elements.iosSection
+          .classList
+          .add("hidden");
+
         elements.guidanceContent.innerHTML =
           '<div class="notice danger">' +
             "<strong>Bu Android tarayıcısında " +
@@ -1585,6 +1761,10 @@
         device,
         browser
       ) {
+        elements.iosSection
+          .classList
+          .add("hidden");
+
         const browserName =
           browser === "edge"
             ? "Microsoft Edge"
@@ -1627,9 +1807,50 @@
           "Firefox’u indir";
       }
 
+      function renderIOS() {
+        elements.guidanceContent.innerHTML =
+          '<div class="notice warning">' +
+            "<strong>Safari algılandı.</strong> " +
+            "iPhone ve iPad kurulumu elle yapılır. " +
+            "Aşağıdaki adımları izleyerek seçtiğiniz TemizWeb " +
+            "filtresinin bütün içeriğini Özel filtreler alanına yapıştırın." +
+          "</div>";
+
+        elements.androidSettingsSection
+          .classList
+          .add("hidden");
+
+        elements.privateSection
+          .classList
+          .add("hidden");
+
+        elements.subscribeSection
+          .classList
+          .add("hidden");
+
+        elements.chromiumFirefoxSection
+          .classList
+          .add("hidden");
+
+        elements.chromiumLimitSection
+          .classList
+          .add("hidden");
+
+        elements.iosSection
+          .classList
+          .remove("hidden");
+
+        elements.iosAppstoreButton.href =
+          links.iosUblock;
+      }
+
       function renderOther(
         device
       ) {
+        elements.iosSection
+          .classList
+          .add("hidden");
+
         elements.guidanceContent.innerHTML =
           '<div class="notice warning">' +
             "Tarayıcınız kesin olarak algılanamadı. " +
@@ -1692,6 +1913,15 @@
           renderFirefox(
             environment.device
           );
+
+          return;
+        }
+
+        if (
+          environment.device === "ios" &&
+          environment.browser === "safari"
+        ) {
+          renderIOS();
 
           return;
         }
@@ -1777,6 +2007,51 @@
                 "Bağlantı otomatik kopyalanamadı. URL\'yi seçip " +
                 "elle kopyalamak için tarayıcınızın kopyalama iznini kontrol edin.";
 
+            }
+          }
+        );
+
+      elements.iosCopyFilter
+        .addEventListener(
+          "click",
+          async function () {
+            elements.iosCopyStatus
+              .classList
+              .remove("hidden");
+
+            elements.iosCopyStatus.textContent =
+              "TemizWeb filtre içeriği hazırlanıyor…";
+
+            try {
+              const response =
+                await fetch(
+                  selectedFilter.url,
+                  {
+                    cache: "no-store"
+                  }
+                );
+
+              if (!response.ok) {
+                throw new Error(
+                  "HTTP " + response.status
+                );
+              }
+
+              const filterText =
+                await response.text();
+
+              await navigator.clipboard.writeText(
+                filterText
+              );
+
+              elements.iosCopyStatus.textContent =
+                "TemizWeb filtre içeriği kopyalandı. " +
+                "Safari → uBlock Origin Lite → Kontrol Paneli → " +
+                "Özel filtreler → İçeri/Dışarı Aktar alanına yapıştırın.";
+            } catch (error) {
+              elements.iosCopyStatus.textContent =
+                "Filtre içeriği otomatik kopyalanamadı. " +
+                "Safari'nin pano iznini kontrol edip düğmeye tekrar basın.";
             }
           }
         );
