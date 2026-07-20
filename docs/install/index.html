@@ -917,8 +917,8 @@
 
         <div class="notice warning">
           <strong>iPhone/iPad kurulumu elle yapılır.</strong>
-          Bu sürüm hiçbir filtre dosyasını sonradan indirmez ve tarayıcıda
-          gruplama yapmaz. Filtre parçaları statik sayfaların içinde hazırdır.
+          Seçtiğiniz TemizWeb listesinin tamamı tek düğmeyle kopyalanır.
+          Site site ayırma veya tarayıcıda gruplama yapılmaz.
         </div>
 
         <div class="steps">
@@ -950,8 +950,8 @@
           <div class="step">
             <strong>Özel filtreler → İçeri/Dışarı Aktar</strong>
             <span>
-              Aşağıdaki statik parçalar sayfasını açın. Her parçayı sırayla
-              kopyalayıp bu alana yapıştırın ve uygulayın.
+              Aşağıdaki düğmeyle tam listeyi kopyalayın.
+              Bu alana bir kez yapıştırın ve uygulayın.
             </span>
           </div>
         </div>
@@ -968,11 +968,11 @@
           </a>
 
           <a
-            id="ios-static-filter-link"
+            id="ios-single-copy-link"
             class="button"
-            href="ios-static/main/index.html"
+            href="ios-copy/main.html"
           >
-            Statik filtre parçalarını aç
+            Tam filtreyi kopyalama sayfasını aç
           </a>
         </div>
 
@@ -984,9 +984,8 @@
         </div>
 
         <div class="notice">
-          PMO ve Tam Koruma listeleri çok büyüktür; bu nedenle onlar çok
-          sayıda statik parçaya ayrılır. Sosyal medya listesi çok daha küçüktür.
-          iOS’ta elle eklenen filtreler otomatik güncellenmez.
+          iOS’ta elle yapıştırılan filtreler otomatik güncellenmez.
+          TemizWeb güncellendiğinde listeyi yeniden kopyalayıp yapıştırmanız gerekir.
         </div>
       </section>
 
@@ -1343,9 +1342,9 @@
             "ios-appstore-button"
           ),
 
-        iosStaticFilterLink:
+        iosSingleCopyLink:
           document.getElementById(
-            "ios-static-filter-link"
+            "ios-single-copy-link"
           ),
 
         otherListsHeading:
@@ -1820,8 +1819,8 @@
         elements.iosAppstoreButton.href =
           links.iosUblock;
 
-        elements.iosStaticFilterLink.href =
-          "ios-static/" +
+        elements.iosSingleCopyLink.href =
+          "ios-copy/" +
           (
             requestedFilter === "pmo"
               ? "pmo"
@@ -1829,7 +1828,7 @@
                 ? "social"
                 : "main"
           ) +
-          "/index.html";
+          ".html";
       }
 
       function renderOther(
