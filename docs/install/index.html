@@ -777,33 +777,28 @@
         class="section hidden"
       >
         <h2>
-          3. TemizWeb için Firefox’a geçin
+          3. Chrome veya Edge kurulumu
         </h2>
 
-        <div class="notice danger">
-          <strong>
-            uBlock Origin Lite harici TemizWeb
-            aboneliğini açamaz.
-          </strong>
-
-          Chrome ve Edge’deki resmi uBlock Origin Lite,
-          yalnızca uzantıyla birlikte sunulan kuralları
-          kullanır. Bu nedenle TemizWeb abonelik düğmesi
-          Chrome’da çalışmaz.
+        <div class="notice warning">
+          <strong>İki seçenek vardır:</strong>
+          Firefox’ta TemizWeb abonelik olarak eklenir ve
+          GitHub’daki güncellemeleri otomatik alır. Chrome ve
+          Edge’de ise filtre metni elle eklenebilir; yeni
+          TemizWeb sürümleri çıktığında bu işlem tekrarlanmalıdır.
         </div>
 
         <div class="choice-grid">
           <div class="choice-card recommended">
             <span class="badge">
-              TemizWeb için önerilen
+              Önerilen ve otomatik güncellenen
             </span>
 
             <h3>Firefox + uBlock Origin</h3>
 
             <p>
-              TemizWeb’in harici filtre aboneliğini ve
-              gelişmiş kurallarını kullanmak için Firefox
-              ile devam edin.
+              En kolay ve eksiksiz yöntemdir. TemizWeb liste
+              aboneliği olarak eklenir ve güncel kalır.
             </p>
 
             <div class="button-row two">
@@ -829,14 +824,39 @@
           </div>
 
           <div class="choice-card">
-            <h3>uBlock Origin Lite hakkında</h3>
+            <h3>Chrome/Edge — elle kurulum</h3>
 
             <p>
-              uBlock Origin Lite’ı genel reklam ve takip
-              engelleme amacıyla kullanabilirsiniz; ancak
-              TemizWeb’in harici abonelik bağlantısı resmi
-              uBOL tarafından desteklenmez.
+              uBlock Origin Lite harici abonelik bağlantısını
+              açmaz. Bunun yerine seçtiğiniz TemizWeb kurallarını
+              kopyalayıp eklentinin özel filtre alanına yapıştırın.
             </p>
+
+            <div class="steps">
+              <div class="step">
+                <strong>uBlock Origin Lite’ı kurun</strong>
+                <span>
+                  Eklenti sayfasını açın ve tarayıcınıza ekleyin.
+                </span>
+              </div>
+
+              <div class="step">
+                <strong>TemizWeb kurallarını kopyalayın</strong>
+                <span>
+                  Aşağıdaki düğme seçtiğiniz güncel filtre
+                  dosyasının tamamını panoya kopyalar.
+                </span>
+              </div>
+
+              <div class="step">
+                <strong>Özel filtre alanına yapıştırın</strong>
+                <span>
+                  uBlock Origin Lite seçeneklerini açın. “My
+                  filters”, “Özel filtreler” veya benzer adlı
+                  alana yapıştırıp kaydedin.
+                </span>
+              </div>
+            </div>
 
             <div class="button-row">
               <a
@@ -845,9 +865,33 @@
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                uBlock Origin Lite sayfasını aç
+                uBlock Origin Lite’ı aç
+              </a>
+
+              <button
+                id="chromium-copy-filter"
+                class="button"
+                type="button"
+              >
+                TemizWeb kurallarını kopyala
+              </button>
+
+              <a
+                id="chromium-open-raw"
+                class="button secondary"
+                href="#"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Filtre dosyasını aç
               </a>
             </div>
+
+            <div
+              id="chromium-copy-status"
+              class="notice hidden"
+              aria-live="polite"
+            ></div>
           </div>
         </div>
       </section>
@@ -1175,6 +1219,21 @@
             "chromium-firefox-download"
           ),
 
+        chromiumCopyFilter:
+          document.getElementById(
+            "chromium-copy-filter"
+          ),
+
+        chromiumOpenRaw:
+          document.getElementById(
+            "chromium-open-raw"
+          ),
+
+        chromiumCopyStatus:
+          document.getElementById(
+            "chromium-copy-status"
+          ),
+
         otherListsHeading:
           document.getElementById(
             "other-lists-heading"
@@ -1211,6 +1270,9 @@
         encodeURIComponent(
           selectedFilter.title
         );
+
+      elements.chromiumOpenRaw.href =
+        selectedFilter.url;
 
       function detectEnvironment() {
         const ua =
@@ -1521,14 +1583,9 @@
             "<strong>" +
             browserName +
             " algılandı.</strong> " +
-            "Resmi uBlock Origin Lite, TemizWeb gibi " +
-            "harici filtre aboneliklerini açamaz. " +
-            "TemizWeb kurulumu için Firefox kullanın." +
-          "</div>" +
-          '<div class="choice-grid">' +
-            recommendedFirefoxCard(
-              device
-            ) +
+            "Firefox önerilir; ancak masaüstünde Chrome veya " +
+            "Edge için elle filtre ekleme seçeneğini de " +
+            "kullanabilirsiniz." +
           "</div>";
 
         elements.androidSettingsSection
@@ -1548,14 +1605,10 @@
           .remove("hidden");
 
         elements.chromiumFirefoxDownload.href =
-          device === "android"
-            ? links.firefoxAndroid
-            : links.firefoxDesktop;
+          links.firefoxDesktop;
 
         elements.chromiumFirefoxDownload.textContent =
-          device === "android"
-            ? "Firefox’u yükle"
-            : "Firefox’u indir";
+          "Firefox’u indir";
       }
 
       function renderOther(
@@ -1675,6 +1728,94 @@
               },
               1800
             );
+          }
+        );
+
+      elements.chromiumCopyFilter
+        .addEventListener(
+          "click",
+          async function () {
+            const button =
+              elements.chromiumCopyFilter;
+
+            const originalText =
+              button.textContent;
+
+            button.disabled = true;
+            button.textContent =
+              "Kurallar hazırlanıyor…";
+
+            try {
+              const response =
+                await fetch(
+                  selectedFilter.url,
+                  {
+                    cache: "no-store"
+                  }
+                );
+
+              if (!response.ok) {
+                throw new Error(
+                  "Filtre indirilemedi."
+                );
+              }
+
+              const filterText =
+                await response.text();
+
+              await navigator.clipboard.writeText(
+                filterText
+              );
+
+              elements.chromiumCopyStatus
+                .classList
+                .remove("hidden");
+
+              elements.chromiumCopyStatus
+                .classList
+                .remove("warning");
+
+              elements.chromiumCopyStatus
+                .textContent =
+                  "TemizWeb kuralları panoya kopyalandı. " +
+                  "Şimdi uBlock Origin Lite’ın özel filtre " +
+                  "alanına yapıştırıp kaydedin.";
+
+              button.textContent =
+                "Kopyalandı";
+            } catch (error) {
+              elements.chromiumCopyStatus
+                .classList
+                .remove("hidden");
+
+              elements.chromiumCopyStatus
+                .classList
+                .add("warning");
+
+              elements.chromiumCopyStatus
+                .innerHTML =
+                  "Otomatik kopyalama başarısız oldu. " +
+                  "“Filtre dosyasını aç” düğmesine basın, " +
+                  "tüm metni seçip elle kopyalayın.";
+
+              button.textContent =
+                originalText;
+            } finally {
+              window.setTimeout(
+                function () {
+                  button.disabled = false;
+
+                  if (
+                    button.textContent ===
+                    "Kopyalandı"
+                  ) {
+                    button.textContent =
+                      originalText;
+                  }
+                },
+                2500
+              );
+            }
           }
         );
 
