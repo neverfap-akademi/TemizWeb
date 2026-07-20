@@ -2,26 +2,58 @@
 <html lang="tr">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  >
+
   <meta name="color-scheme" content="light dark">
-  <title>TemizWeb Filtresini Kur</title>
-  <meta name="description" content="TemizWeb filtre aboneliğini uBlock Origin'e ekleyin.">
+
+  <title>TemizWeb Kurulum Sihirbazı</title>
+
+  <meta
+    name="description"
+    content="Cihazınıza ve tarayıcınıza uygun TemizWeb filtresini kurun."
+  >
+
   <style>
     :root {
-      --bg: #f6faf8;
+      --bg: #f4f8f6;
       --panel: #ffffff;
+      --panel-soft: #f8fbf9;
       --text: #17211d;
       --muted: #5d6a64;
       --border: #d7e1dc;
+
       --primary: #176b52;
       --primary-dark: #10513e;
-      --primary-soft: #eaf7f2;
+      --primary-soft: #e8f6f0;
+
+      --recommended: #176b52;
+      --recommended-soft: #e8f6f0;
+
       --warning-bg: #fff8e7;
       --warning-border: #e8ce86;
+      --warning-text: #5b4710;
+
+      --info-bg: #eef5ff;
+      --info-border: #b9d1ef;
+      --info-text: #193b61;
+
+      --danger-bg: #fff0f0;
+      --danger-border: #e5b0b0;
+      --danger-text: #6b2020;
+
+      --shadow: 0 18px 45px rgba(23, 50, 40, 0.08);
     }
 
     * {
       box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
     }
 
     body {
@@ -29,26 +61,80 @@
       min-height: 100vh;
       background: var(--bg);
       color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Arial,
+        sans-serif;
       line-height: 1.55;
     }
 
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    a {
+      color: var(--primary);
+    }
+
     main {
-      width: min(720px, calc(100% - 32px));
-      margin: 40px auto;
+      width: min(820px, calc(100% - 32px));
+      margin: 36px auto;
     }
 
     .panel {
       padding: 30px;
       border: 1px solid var(--border);
-      border-radius: 20px;
+      border-radius: 22px;
       background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .brand {
+      display: inline-flex;
+      margin-bottom: 14px;
+      align-items: center;
+      gap: 8px;
+      color: var(--primary);
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+    }
+
+    .brand-mark {
+      display: inline-flex;
+      width: 30px;
+      height: 30px;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      background: var(--primary);
+      color: #ffffff;
+    }
+
+    h1,
+    h2,
+    h3 {
+      line-height: 1.2;
     }
 
     h1 {
-      margin: 0 0 10px;
-      font-size: clamp(30px, 6vw, 44px);
-      line-height: 1.1;
+      margin: 0 0 12px;
+      font-size: clamp(30px, 6vw, 46px);
+    }
+
+    h2 {
+      margin: 0 0 14px;
+      font-size: 23px;
+    }
+
+    h3 {
+      margin: 0 0 8px;
+      font-size: 18px;
     }
 
     p {
@@ -56,6 +142,7 @@
     }
 
     .lead {
+      max-width: 680px;
       color: var(--muted);
       font-size: 18px;
     }
@@ -63,80 +150,211 @@
     .selection {
       margin-top: 24px;
       padding: 18px;
-      border-radius: 14px;
+      border: 1px solid #b9dfd0;
+      border-radius: 16px;
       background: var(--primary-soft);
+    }
+
+    .selection-label {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
     }
 
     .selection strong {
       display: block;
-      margin-bottom: 4px;
+      margin-bottom: 5px;
       color: var(--primary-dark);
-      font-size: 18px;
+      font-size: 20px;
+    }
+
+    .selection span {
+      color: var(--muted);
+    }
+
+    .detected {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .detected-item {
+      padding: 13px 15px;
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      background: var(--panel-soft);
+    }
+
+    .detected-item span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .detected-item strong {
+      display: block;
+      margin-top: 2px;
+      font-size: 16px;
+    }
+
+    .section {
+      margin-top: 28px;
+      padding-top: 26px;
+      border-top: 1px solid var(--border);
+    }
+
+    .notice {
+      margin-top: 16px;
+      padding: 15px 16px;
+      border: 1px solid var(--info-border);
+      border-radius: 14px;
+      background: var(--info-bg);
+      color: var(--info-text);
+      font-size: 14px;
+    }
+
+    .notice.warning {
+      border-color: var(--warning-border);
+      background: var(--warning-bg);
+      color: var(--warning-text);
+    }
+
+    .notice.danger {
+      border-color: var(--danger-border);
+      background: var(--danger-bg);
+      color: var(--danger-text);
+    }
+
+    .choice-grid {
+      display: grid;
+      gap: 14px;
+      margin-top: 16px;
+    }
+
+    .choice-card {
+      padding: 18px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: var(--panel-soft);
+    }
+
+    .choice-card.recommended {
+      border: 2px solid var(--recommended);
+      background: var(--recommended-soft);
+    }
+
+    .badge {
+      display: inline-block;
+      margin-bottom: 8px;
+      padding: 4px 9px;
+      border-radius: 999px;
+      background: var(--primary);
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .choice-card p {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .button-row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-top: 15px;
     }
 
     .button {
       display: flex;
       width: 100%;
-      min-height: 56px;
-      margin-top: 20px;
+      min-height: 54px;
       align-items: center;
       justify-content: center;
-      padding: 14px 18px;
+      padding: 13px 18px;
       border: 0;
       border-radius: 14px;
       background: var(--primary);
       color: #ffffff;
+      cursor: pointer;
       text-align: center;
       text-decoration: none;
-      font-size: 17px;
-      font-weight: 700;
+      font-size: 16px;
+      font-weight: 800;
     }
 
     .button:hover,
-    .button:focus {
+    .button:focus-visible {
       background: var(--primary-dark);
     }
 
-    .secondary {
+    .button.secondary {
       border: 1px solid var(--primary);
       background: transparent;
       color: var(--primary-dark);
     }
 
-    .secondary:hover,
-    .secondary:focus {
+    .button.secondary:hover,
+    .button.secondary:focus-visible {
       background: var(--primary-soft);
+    }
+
+    .button.subtle {
+      border: 1px solid var(--border);
+      background: var(--panel);
+      color: var(--text);
+    }
+
+    .button.subtle:hover,
+    .button.subtle:focus-visible {
+      background: var(--panel-soft);
+    }
+
+    .button.disabled {
+      opacity: 0.55;
+      pointer-events: none;
     }
 
     .steps {
       display: grid;
       gap: 12px;
-      margin-top: 24px;
+      margin-top: 18px;
       counter-reset: step;
     }
 
     .step {
       position: relative;
-      padding: 15px 15px 15px 52px;
+      min-height: 62px;
+      padding: 15px 15px 15px 54px;
       border: 1px solid var(--border);
-      border-radius: 13px;
+      border-radius: 14px;
+      background: var(--panel-soft);
       counter-increment: step;
     }
 
     .step::before {
       content: counter(step);
       position: absolute;
-      top: 14px;
-      left: 14px;
+      top: 15px;
+      left: 15px;
       display: flex;
-      width: 26px;
-      height: 26px;
+      width: 27px;
+      height: 27px;
       align-items: center;
       justify-content: center;
       border-radius: 50%;
       background: var(--primary);
       color: #ffffff;
-      font-weight: 700;
+      font-size: 14px;
+      font-weight: 800;
     }
 
     .step strong {
@@ -145,109 +363,398 @@
     }
 
     .step span {
+      display: block;
       color: var(--muted);
       font-size: 14px;
     }
 
-    .warning {
-      margin-top: 20px;
-      padding: 15px;
-      border: 1px solid var(--warning-border);
+    .check-row {
+      display: flex;
+      margin-top: 16px;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 14px;
+      border: 1px solid var(--border);
       border-radius: 13px;
-      background: var(--warning-bg);
+      background: var(--panel-soft);
+    }
+
+    .check-row input {
+      width: 20px;
+      height: 20px;
+      margin: 2px 0 0;
+      flex: 0 0 auto;
+      accent-color: var(--primary);
+    }
+
+    .check-row label {
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .check-row small {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-weight: 400;
+    }
+
+    details {
+      margin-top: 14px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--panel-soft);
+    }
+
+    summary {
+      padding: 15px 16px;
+      cursor: pointer;
+      font-weight: 800;
+    }
+
+    .details-body {
+      padding: 0 16px 16px;
+      color: var(--muted);
       font-size: 14px;
     }
 
+    .details-body p + p {
+      margin-top: 10px;
+    }
+
+    .details-body ol,
+    .details-body ul {
+      margin: 10px 0 0;
+      padding-left: 22px;
+    }
+
+    .details-body li + li {
+      margin-top: 6px;
+    }
+
+    .manual-controls {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .field label {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .field select {
+      width: 100%;
+      min-height: 46px;
+      padding: 9px 12px;
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      background: var(--panel);
+      color: var(--text);
+    }
+
     .small {
-      margin-top: 16px;
+      margin-top: 18px;
       color: var(--muted);
       font-size: 13px;
       text-align: center;
     }
 
+    .footer-links {
+      display: flex;
+      margin-top: 20px;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 14px;
+      font-size: 14px;
+    }
+
     .hidden {
-      display: none;
+      display: none !important;
     }
 
     @media (prefers-color-scheme: dark) {
       :root {
-        --bg: #111715;
+        --bg: #101614;
         --panel: #18201d;
+        --panel-soft: #1d2824;
         --text: #eef5f1;
         --muted: #b7c5be;
         --border: #34433c;
+
         --primary: #2b9875;
-        --primary-dark: #66c7a5;
+        --primary-dark: #72d5b2;
         --primary-soft: #18372d;
+
+        --recommended: #4ab28c;
+        --recommended-soft: #19362c;
+
         --warning-bg: #332d1c;
         --warning-border: #786533;
+        --warning-text: #f0dfaa;
+
+        --info-bg: #172b3e;
+        --info-border: #355c80;
+        --info-text: #c8e1f8;
+
+        --danger-bg: #351f1f;
+        --danger-border: #754343;
+        --danger-text: #f1c2c2;
+
+        --shadow: none;
+      }
+
+      .selection {
+        border-color: #326b57;
       }
     }
 
-    @media (max-width: 520px) {
+    @media (min-width: 650px) {
+      .button-row.two {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 600px) {
       main {
-        margin: 18px auto;
+        width: min(100% - 20px, 820px);
+        margin: 10px auto;
       }
 
       .panel {
         padding: 21px;
-        border-radius: 16px;
+        border-radius: 17px;
+      }
+
+      .detected,
+      .manual-controls {
+        grid-template-columns: 1fr;
+      }
+
+      h1 {
+        font-size: 32px;
+      }
+
+      .lead {
+        font-size: 16px;
       }
     }
   </style>
 </head>
+
 <body>
   <main>
     <section class="panel">
-      <h1>TemizWeb Filtresini Kur</h1>
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">✓</span>
+        TemizWeb
+      </div>
+
+      <h1>Kurulum Sihirbazı</h1>
 
       <p class="lead">
-        Seçtiğiniz TemizWeb listesini uBlock Origin’e eklemek için
-        aşağıdaki düğmeye basın.
+        Cihazınıza ve tarayıcınıza uygun eklentiyi kurun,
+        ardından seçtiğiniz TemizWeb listesini ekleyin.
       </p>
 
       <div class="selection">
+        <span class="selection-label">Seçilen koruma</span>
         <strong id="filter-title">TemizWeb</strong>
-        <span id="filter-description">Filtre seçimi hazırlanıyor.</span>
+        <span id="filter-description">
+          Filtre seçimi hazırlanıyor.
+        </span>
       </div>
 
-      <a id="subscribe-button" class="button" href="#">
-        uBlock Origin’e ekle
-      </a>
-
-      <a
-        class="button secondary"
-        href="https://addons.mozilla.org/tr/firefox/addon/ublock-origin/"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        uBlock Origin kurulu değilse yükle
-      </a>
-
-      <div class="steps">
-        <div class="step">
-          <strong>Firefox ve uBlock Origin kurulu olmalı</strong>
-          <span>Bu sayfayı Firefox içinde açın.</span>
+      <div class="detected" aria-live="polite">
+        <div class="detected-item">
+          <span>Cihaz</span>
+          <strong id="detected-device">Algılanıyor…</strong>
         </div>
 
-        <div class="step">
-          <strong>“uBlock Origin’e ekle” düğmesine basın</strong>
-          <span>uBlock Origin abonelik onay ekranını açacaktır.</span>
-        </div>
-
-        <div class="step">
-          <strong>Aboneliği onaylayın</strong>
-          <span>Liste daha sonra otomatik olarak güncellenir.</span>
+        <div class="detected-item">
+          <span>Tarayıcı</span>
+          <strong id="detected-browser">Algılanıyor…</strong>
         </div>
       </div>
 
-      <div id="manual-warning" class="warning hidden">
-        Düğmeye bastığınızda hiçbir şey olmazsa uBlock Origin’in kurulu
-        olduğunu ve bu sayfanın Firefox içinde açık olduğunu kontrol edin.
+      <div id="browser-guidance" class="section">
+        <h2>1. Tarayıcı ve eklenti</h2>
+
+        <div id="guidance-content"></div>
+      </div>
+
+      <section id="private-section" class="section">
+        <h2>2. Gizli/özel pencere izni</h2>
+
+        <div id="private-guidance" class="notice warning">
+          Eklentinin gizli sekmelerde çalışabilmesi için ilgili izni
+          tarayıcı ayarlarından açmanız gerekir.
+        </div>
+
+        <div class="check-row">
+          <input
+            id="private-confirm"
+            type="checkbox"
+          >
+
+          <label for="private-confirm">
+            Gizli/özel pencere iznini kontrol ettim
+            <small>
+              Bu kutu ayarı otomatik olarak değiştirmez; yalnızca
+              adımı unutmamanıza yardımcı olur.
+            </small>
+          </label>
+        </div>
+      </section>
+
+      <section id="subscribe-section" class="section">
+        <h2>3. TemizWeb filtresini ekleyin</h2>
+
+        <p class="lead" style="font-size: 15px;">
+          Eklenti kurulduktan sonra aşağıdaki düğmeye basın.
+          Açılan abonelik ekranını onaylayın.
+        </p>
+
+        <a
+          id="subscribe-button"
+          class="button"
+          href="#"
+        >
+          TemizWeb filtresini ekle
+        </a>
+
+        <div
+          id="manual-warning"
+          class="notice warning hidden"
+        >
+          Hiçbir şey açılmadıysa eklentinin kurulu olduğunu kontrol edin.
+          Ardından bu sekmeyi yenileyip tekrar deneyin.
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>4. Diğer uBlock filtreleri</h2>
+
+        <div class="notice">
+          <strong>Önerilen:</strong>
+          Varsayılan listeleri olduğu gibi bırakabilirsiniz.
+          Bunlar reklam, takip ve bazı kötü amaçlı adreslere karşı
+          ek koruma sağlar.
+        </div>
+
+        <details>
+          <summary>
+            Yalnızca TemizWeb kullanmak istiyorum
+          </summary>
+
+          <div class="details-body">
+            <p>
+              TemizWeb dışındaki reklam ve takip listelerini kullanmak
+              istemiyorsanız bunları uBlock ayarlarından elle kapatabilirsiniz.
+              Kurulum sayfası mevcut eklenti ayarlarınızı otomatik değiştiremez.
+            </p>
+
+            <div id="filter-list-instructions"></div>
+
+            <p>
+              TemizWeb listesinin işaretli kalmasına dikkat edin.
+              Değişikliklerden sonra
+              <strong>Değişiklikleri uygula</strong>
+              veya eşdeğer kaydetme düğmesine basın.
+            </p>
+          </div>
+        </details>
+      </section>
+
+      <section class="section">
+        <h2>5. Kurulumu test edin</h2>
+
+        <div class="steps">
+          <div class="step">
+            <strong>YouTube’u kontrol edin</strong>
+            <span>
+              Tam Koruma veya Sosyal Medya modunda ana akış ve
+              Shorts düğmesi gizlenmelidir.
+            </span>
+          </div>
+
+          <div class="step">
+            <strong>Instagram’ı kontrol edin</strong>
+            <span>
+              Ana akış gizlenmeli; hesap arama alanı kullanılabilmelidir.
+            </span>
+          </div>
+
+          <div class="step">
+            <strong>PMO sorgusunu kontrol edin</strong>
+            <span>
+              PMO veya Tam Koruma modunda güçlü PMO aramaları
+              engellenmelidir.
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <details>
+        <summary>Yanlış cihaz veya tarayıcı algılandı</summary>
+
+        <div class="details-body">
+          <p>
+            Tarayıcınızın gizlilik ayarları cihaz bilgisini değiştirebilir.
+            Aşağıdan elle seçim yapabilirsiniz.
+          </p>
+
+          <div class="manual-controls">
+            <div class="field">
+              <label for="manual-device">Cihaz</label>
+
+              <select id="manual-device">
+                <option value="auto">Otomatik algıla</option>
+                <option value="android">Android</option>
+                <option value="windows">Windows</option>
+                <option value="desktop">Diğer masaüstü</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="manual-browser">Tarayıcı</label>
+
+              <select id="manual-browser">
+                <option value="auto">Otomatik algıla</option>
+                <option value="firefox">Firefox</option>
+                <option value="chrome">Chrome</option>
+                <option value="edge">Microsoft Edge</option>
+                <option value="other">Diğer</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </details>
+
+      <div class="footer-links">
+        <a
+          href="https://neverfapakademi.com/temizweb-kurulum/"
+          rel="noopener"
+        >
+          Ayrıntılı rehber
+        </a>
+
+        <a
+          href="https://github.com/neverfap-akademi/TemizWeb"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Açık kaynak kodu
+        </a>
       </div>
 
       <p class="small">
         TemizWeb SafeSearch veya YouTube Kısıtlı Mod zorlamaz.
+        Filtreleme cihazınızda yapılır.
       </p>
     </section>
   </main>
@@ -282,29 +789,439 @@
         }
       };
 
+      const links = {
+        firefoxAddon:
+          "https://addons.mozilla.org/tr/firefox/addon/ublock-origin/",
+
+        firefoxDesktop:
+          "https://www.mozilla.org/tr/firefox/new/",
+
+        firefoxAndroid:
+          "https://play.google.com/store/apps/details?id=org.mozilla.firefox",
+
+        chromeLite:
+          "https://chromewebstore.google.com/detail/ublock-origin-lite/ddkjiahejlhfcafbddmgiahcphecmpfh?hl=tr",
+
+        chromeExtensions:
+          "chrome://extensions/"
+      };
+
       const params = new URLSearchParams(window.location.search);
-      const requested = params.get("filter");
-      const selected = filters[requested] || filters.main;
+      const requestedFilter = params.get("filter");
+      const selectedFilter =
+        filters[requestedFilter] || filters.main;
 
-      const title = document.getElementById("filter-title");
-      const description = document.getElementById("filter-description");
-      const button = document.getElementById("subscribe-button");
-      const warning = document.getElementById("manual-warning");
+      const elements = {
+        filterTitle:
+          document.getElementById("filter-title"),
 
-      title.textContent = selected.title;
-      description.textContent = selected.description;
+        filterDescription:
+          document.getElementById("filter-description"),
 
-      button.href =
+        detectedDevice:
+          document.getElementById("detected-device"),
+
+        detectedBrowser:
+          document.getElementById("detected-browser"),
+
+        guidanceContent:
+          document.getElementById("guidance-content"),
+
+        privateGuidance:
+          document.getElementById("private-guidance"),
+
+        subscribeButton:
+          document.getElementById("subscribe-button"),
+
+        manualWarning:
+          document.getElementById("manual-warning"),
+
+        manualDevice:
+          document.getElementById("manual-device"),
+
+        manualBrowser:
+          document.getElementById("manual-browser"),
+
+        filterListInstructions:
+          document.getElementById("filter-list-instructions")
+      };
+
+      elements.filterTitle.textContent =
+        selectedFilter.title;
+
+      elements.filterDescription.textContent =
+        selectedFilter.description;
+
+      elements.subscribeButton.href =
         "ubo:subscribe?location=" +
-        encodeURIComponent(selected.url) +
+        encodeURIComponent(selectedFilter.url) +
         "&title=" +
-        encodeURIComponent(selected.title);
+        encodeURIComponent(selectedFilter.title);
 
-      button.addEventListener("click", function () {
-        window.setTimeout(function () {
-          warning.classList.remove("hidden");
-        }, 1600);
-      });
+      function detectEnvironment() {
+        const ua = navigator.userAgent || "";
+        const platform =
+          navigator.userAgentData &&
+          navigator.userAgentData.platform
+            ? navigator.userAgentData.platform
+            : navigator.platform || "";
+
+        const isAndroid =
+          /Android/i.test(ua);
+
+        const isWindows =
+          /Windows/i.test(ua) ||
+          /Win/i.test(platform);
+
+        const isFirefox =
+          /Firefox|FxiOS/i.test(ua);
+
+        const isEdge =
+          /EdgA|EdgiOS|Edg/i.test(ua);
+
+        const isChrome =
+          !isEdge &&
+          /Chrome|CriOS/i.test(ua);
+
+        let device = "desktop";
+
+        if (isAndroid) {
+          device = "android";
+        } else if (isWindows) {
+          device = "windows";
+        }
+
+        let browser = "other";
+
+        if (isFirefox) {
+          browser = "firefox";
+        } else if (isEdge) {
+          browser = "edge";
+        } else if (isChrome) {
+          browser = "chrome";
+        }
+
+        return {
+          device: device,
+          browser: browser
+        };
+      }
+
+      const automaticEnvironment =
+        detectEnvironment();
+
+      function deviceLabel(device) {
+        const labels = {
+          android: "Android",
+          windows: "Windows",
+          desktop: "Masaüstü"
+        };
+
+        return labels[device] || "Bilinmeyen cihaz";
+      }
+
+      function browserLabel(browser) {
+        const labels = {
+          firefox: "Firefox",
+          chrome: "Google Chrome",
+          edge: "Microsoft Edge",
+          other: "Diğer tarayıcı"
+        };
+
+        return labels[browser] || "Bilinmeyen tarayıcı";
+      }
+
+      function linkButton(
+        text,
+        href,
+        variant,
+        newTab
+      ) {
+        const target =
+          newTab
+            ? ' target="_blank" rel="noopener noreferrer"'
+            : "";
+
+        return (
+          '<a class="button ' +
+          (variant || "") +
+          '" href="' +
+          href +
+          '"' +
+          target +
+          ">" +
+          text +
+          "</a>"
+        );
+      }
+
+      function recommendedFirefoxCard(device) {
+        const firefoxLink =
+          device === "android"
+            ? links.firefoxAndroid
+            : links.firefoxDesktop;
+
+        return (
+          '<div class="choice-card recommended">' +
+            '<span class="badge">Önerilen</span>' +
+            "<h3>Firefox + uBlock Origin</h3>" +
+            "<p>" +
+              "TemizWeb’in gelişmiş filtreleri için en kapsamlı " +
+              "ve önerilen kurulumdur." +
+            "</p>" +
+            '<div class="button-row two">' +
+              linkButton(
+                device === "android"
+                  ? "Firefox’u yükle"
+                  : "Firefox’u indir",
+                firefoxLink,
+                "",
+                true
+              ) +
+              linkButton(
+                "uBlock Origin’i yükle",
+                links.firefoxAddon,
+                "secondary",
+                true
+              ) +
+            "</div>" +
+          "</div>"
+        );
+      }
+
+      function chromeLiteCard() {
+        return (
+          '<div class="choice-card">' +
+            "<h3>Chrome + uBlock Origin Lite</h3>" +
+            "<p>" +
+              "Windows Chrome’da kullanabileceğiniz alternatif " +
+              "kurulumdur. Firefox seçeneği yine önerilir." +
+            "</p>" +
+            '<div class="button-row">' +
+              linkButton(
+                "uBlock Origin Lite’ı yükle",
+                links.chromeLite,
+                "",
+                true
+              ) +
+            "</div>" +
+          "</div>"
+        );
+      }
+
+      function renderFirefox(device) {
+        elements.guidanceContent.innerHTML =
+          '<div class="choice-grid">' +
+            '<div class="choice-card recommended">' +
+              '<span class="badge">Uygun tarayıcı</span>' +
+              "<h3>uBlock Origin’i yükleyin</h3>" +
+              "<p>" +
+                "Firefox kullanıyorsunuz. Önce eklentiyi yükleyin, " +
+                "ardından aşağıdaki TemizWeb aboneliğini ekleyin." +
+              "</p>" +
+              '<div class="button-row">' +
+                linkButton(
+                  "uBlock Origin’i yükle",
+                  links.firefoxAddon,
+                  "",
+                  true
+                ) +
+              "</div>" +
+            "</div>" +
+          "</div>";
+
+        elements.privateGuidance.innerHTML =
+          "<strong>Firefox:</strong> " +
+          "Eklenti kurulum ekranında " +
+          "“Özel pencerelerde çalışmasına izin ver” seçeneğini açın. " +
+          "Daha önce kurduysanız Eklentiler yöneticisinden " +
+          "uBlock Origin → Özel pencerelerde çalıştır → İzin ver yolunu kullanın.";
+
+        elements.filterListInstructions.innerHTML =
+          "<ol>" +
+            "<li>uBlock Origin simgesine basın.</li>" +
+            "<li>Ayarlar veya gösterge panelini açın.</li>" +
+            "<li><strong>Filtre listeleri</strong> bölümüne girin.</li>" +
+            "<li>İstemediğiniz varsayılan listelerin işaretini kaldırın.</li>" +
+            "<li>TemizWeb özel listesini işaretli bırakın.</li>" +
+          "</ol>";
+      }
+
+      function renderAndroidChrome() {
+        elements.guidanceContent.innerHTML =
+          '<div class="notice danger">' +
+            "<strong>Android Chrome uzantı kurulumunu desteklemiyor.</strong> " +
+            "TemizWeb’i kullanmak için Firefox Android’e geçin." +
+          "</div>" +
+          '<div class="choice-grid">' +
+            recommendedFirefoxCard("android") +
+          "</div>";
+
+        elements.privateGuidance.innerHTML =
+          "<strong>Firefox Android:</strong> " +
+          "uBlock Origin’i kurduktan sonra eklentinin özel gezinmede " +
+          "çalışmasına izin verin.";
+
+        elements.filterListInstructions.innerHTML =
+          "<ol>" +
+            "<li>Firefox menüsünden Eklentiler bölümünü açın.</li>" +
+            "<li>uBlock Origin ayarlarını açın.</li>" +
+            "<li>Filtre listeleri bölümüne girin.</li>" +
+            "<li>İstemediğiniz ek listeleri kapatın.</li>" +
+            "<li>TemizWeb listesini açık bırakın.</li>" +
+          "</ol>";
+      }
+
+      function renderWindowsChrome() {
+        elements.guidanceContent.innerHTML =
+          '<div class="choice-grid">' +
+            recommendedFirefoxCard("windows") +
+            chromeLiteCard() +
+          "</div>";
+
+        elements.privateGuidance.innerHTML =
+          "<strong>Chrome:</strong> " +
+          "Chrome menüsü → Uzantılar → Uzantıları yönet → " +
+          "uBlock Origin Lite → Ayrıntılar → " +
+          "“Gizli modda izin ver” seçeneğini açın.";
+
+        elements.filterListInstructions.innerHTML =
+          "<p>" +
+            "uBlock Origin Lite’ın seçenek ekranını açın. " +
+            "TemizWeb aboneliğini açık bırakın ve istemediğiniz " +
+            "diğer kuralları veya listeleri kapatın. " +
+            "uBlock Origin Lite ile uBlock Origin’in ayar ekranları " +
+            "aynı görünmeyebilir." +
+          "</p>";
+      }
+
+      function renderWindowsEdge() {
+        elements.guidanceContent.innerHTML =
+          '<div class="notice">' +
+            "Microsoft Edge algılandı. En kolay ve kapsamlı seçenek " +
+            "Firefox + uBlock Origin’dir. Chrome Web Mağazası " +
+            "uzantılarını destekleyen Edge sürümlerinde " +
+            "uBlock Origin Lite alternatifi de kullanılabilir." +
+          "</div>" +
+          '<div class="choice-grid">' +
+            recommendedFirefoxCard("windows") +
+            chromeLiteCard() +
+          "</div>";
+
+        elements.privateGuidance.innerHTML =
+          "<strong>Edge:</strong> " +
+          "Uzantılar → Uzantıları yönet → ilgili uzantı → Ayrıntılar " +
+          "bölümünden özel pencere iznini kontrol edin.";
+
+        elements.filterListInstructions.innerHTML =
+          "<p>" +
+            "Kullandığınız uBlock sürümünün seçenek ekranından " +
+            "TemizWeb listesini açık bırakıp istemediğiniz " +
+            "diğer listeleri elle kapatabilirsiniz." +
+          "</p>";
+      }
+
+      function renderOther(device) {
+        elements.guidanceContent.innerHTML =
+          '<div class="notice warning">' +
+            "Tarayıcınız kesin olarak algılanamadı. " +
+            "Firefox ile açmanız önerilir." +
+          "</div>" +
+          '<div class="choice-grid">' +
+            recommendedFirefoxCard(device) +
+          "</div>";
+
+        elements.privateGuidance.innerHTML =
+          "Eklentiyi kurduktan sonra tarayıcınızın uzantı ayarlarından " +
+          "gizli veya özel pencerelerde çalışma iznini açın.";
+
+        elements.filterListInstructions.innerHTML =
+          "<p>" +
+            "Eklentinizin filtre listeleri veya özel listeler bölümünü açın. " +
+            "TemizWeb’i açık bırakıp istemediğiniz diğer listeleri kapatın." +
+          "</p>";
+      }
+
+      function currentEnvironment() {
+        return {
+          device:
+            elements.manualDevice.value === "auto"
+              ? automaticEnvironment.device
+              : elements.manualDevice.value,
+
+          browser:
+            elements.manualBrowser.value === "auto"
+              ? automaticEnvironment.browser
+              : elements.manualBrowser.value
+        };
+      }
+
+      function renderEnvironment() {
+        const environment =
+          currentEnvironment();
+
+        elements.detectedDevice.textContent =
+          deviceLabel(environment.device);
+
+        elements.detectedBrowser.textContent =
+          browserLabel(environment.browser);
+
+        if (environment.browser === "firefox") {
+          renderFirefox(environment.device);
+          return;
+        }
+
+        if (
+          environment.device === "android" &&
+          (
+            environment.browser === "chrome" ||
+            environment.browser === "edge" ||
+            environment.browser === "other"
+          )
+        ) {
+          renderAndroidChrome();
+          return;
+        }
+
+        if (
+          environment.device === "windows" &&
+          environment.browser === "chrome"
+        ) {
+          renderWindowsChrome();
+          return;
+        }
+
+        if (
+          environment.device === "windows" &&
+          environment.browser === "edge"
+        ) {
+          renderWindowsEdge();
+          return;
+        }
+
+        renderOther(environment.device);
+      }
+
+      elements.manualDevice.addEventListener(
+        "change",
+        renderEnvironment
+      );
+
+      elements.manualBrowser.addEventListener(
+        "change",
+        renderEnvironment
+      );
+
+      elements.subscribeButton.addEventListener(
+        "click",
+        function () {
+          window.setTimeout(function () {
+            elements.manualWarning.classList.remove("hidden");
+          }, 1800);
+        }
+      );
+
+      renderEnvironment();
     })();
   </script>
 </body>
