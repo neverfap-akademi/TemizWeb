@@ -549,7 +549,20 @@ def _content_rule(
 
 
 def build_social_search_query_rules() -> list[tuple[str, str]]:
-    """Block strongly PMO-risky searches on supported social platforms."""
+    """Block strongly PMO-risky searches on supported social platforms.
+
+    These rules inspect both the JavaScript value property and the HTML
+    value attribute of each platform's search field.
+
+    They are generated into 25-social-content.txt, so they appear in:
+    - temizweb-pmo.txt
+    - temizweb-main.txt
+
+    They do not appear in temizweb-social.txt.
+
+    Recovery, legal-help, victim-support and educational queries remain
+    allowed through the shared SAFE pattern.
+    """
 
     families = build_pattern_families()
     safe = build_safe_pattern()
@@ -628,9 +641,8 @@ def build_social_search_query_rules() -> list[tuple[str, str]]:
     for host, selectors in search_inputs.items():
         for selector in selectors:
             for family_name, patterns in search_families.items():
-                # JavaScript DOM property:
-                # Required especially for YouTube, whose live search value
-                # may not be reflected into the HTML value attribute.
+                # JavaScript property version.
+                # YouTube generally keeps the current query here.
                 property_chain = selector
 
                 for pattern in patterns:
@@ -641,10 +653,7 @@ def build_social_search_query_rules() -> list[tuple[str, str]]:
                 property_chain += (
                     f":not(:matches-prop(value=/{safe}/iu))"
                 )
-
-                property_chain += (
-                    ":upward(html) > body"
-                )
+                property_chain += ":upward(html) > body"
 
                 rules.append(
                     (
@@ -656,9 +665,8 @@ def build_social_search_query_rules() -> list[tuple[str, str]]:
                     )
                 )
 
-                # HTML attribute fallback:
-                # Retained for platforms such as Instagram where the live
-                # query may also be reflected into the value attribute.
+                # HTML attribute fallback.
+                # Instagram may reflect its current query here.
                 attribute_chain = (
                     f"{selector}:watch-attr(value)"
                 )
@@ -671,10 +679,7 @@ def build_social_search_query_rules() -> list[tuple[str, str]]:
                 attribute_chain += (
                     f":not(:matches-attr(value=/{safe}/iu))"
                 )
-
-                attribute_chain += (
-                    ":upward(html) > body"
-                )
+                attribute_chain += ":upward(html) > body"
 
                 rules.append(
                     (
@@ -687,7 +692,6 @@ def build_social_search_query_rules() -> list[tuple[str, str]]:
                 )
 
     return rules
-
 
 def generate_social_layers(
     addiction_output: Path = ADDICTION_OUTPUT,
