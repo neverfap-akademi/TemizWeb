@@ -631,7 +631,7 @@
       </div>
 
       <section class="section">
-        <h2>Önce eski TemizWeb listesini kontrol edin</h2>
+        <h2>Daha önce TemizWeb'in başka bir modunu kurduysanız önce eski TemizWeb listesini temizleyin</h2>
 
         <div class="notice warning">
           <strong>Daha önce başka bir TemizWeb filtre modu kurduysanız kaldırın.</strong>
@@ -786,6 +786,39 @@
       </section>
 
       <section
+        id="chromium-firefox-section"
+        class="section hidden"
+      >
+        <h2>Önerilen kurulum</h2>
+
+        <div class="choice-grid">
+          <div class="choice-card recommended">
+            <span class="badge">Önerilen</span>
+            <h3>Firefox + uBlock Origin</h3>
+            <p>
+              Tek düğmeli abonelik, gelişmiş uBlock kuralları ve Android
+              desteği için en kolay yöntemdir. Firefox'u indirip kurulum sayfasına geri gelin. Veya 3. Adıma atlayın.
+            </p>
+            <div class="button-row two">
+              <a
+                id="chromium-firefox-download"
+                class="button"
+                href="https://www.mozilla.org/tr/firefox/new/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >Firefox'u indir</a>
+              <a
+                class="button secondary"
+                href="https://addons.mozilla.org/tr/firefox/addon/ublock-origin/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >uBlock Origin'i yükle</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section
         id="chromium-limit-section"
         class="section hidden"
       >
@@ -800,34 +833,6 @@
         </div>
 
         <div class="choice-grid">
-
-          <div class="choice-card recommended">
-            <span class="badge">Önerilen</span>
-            <h3>Firefox + uBlock Origin</h3>
-
-            <p>
-              Tek düğmeli abonelik, gelişmiş uBlock kuralları ve Android
-              desteği için en kolay yöntemdir.
-            </p>
-
-            <div class="button-row two">
-              <a
-                id="chromium-firefox-download"
-                class="button"
-                href="https://www.mozilla.org/tr/firefox/new/"
-                target="_blank"
-                rel="noopener noreferrer"
-              >Firefox'u indir</a>
-
-              <a
-                class="button secondary"
-                href="https://addons.mozilla.org/tr/firefox/addon/ublock-origin/"
-                target="_blank"
-                rel="noopener noreferrer"
-              >uBlock Origin'i yükle</a>
-            </div>
-          </div>
-
           <div class="choice-card">
             <span class="badge">Chrome / Edge</span>
             <h3>uBlock Origin Lite + TemizWeb URL'si</h3>
@@ -902,7 +907,6 @@
           </div>
 
         </div>
-
       </section>
 
       <section class="section">
@@ -1212,6 +1216,11 @@
             "manual-warning"
           ),
 
+        chromiumFirefoxSection:
+          document.getElementById(
+            "chromium-firefox-section"
+          ),
+
         chromiumLimitSection:
           document.getElementById(
             "chromium-limit-section"
@@ -1495,6 +1504,10 @@
             "</div>" +
           "</div>";
 
+        elements.chromiumFirefoxSection
+          .classList
+          .add("hidden");
+
         elements.chromiumLimitSection
           .classList
           .add("hidden");
@@ -1559,6 +1572,10 @@
           .classList
           .add("hidden");
 
+        elements.chromiumFirefoxSection
+          .classList
+          .add("hidden");
+
         elements.chromiumLimitSection
           .classList
           .add("hidden");
@@ -1594,6 +1611,10 @@
         elements.subscribeSection
           .classList
           .add("hidden");
+
+        elements.chromiumFirefoxSection
+          .classList
+          .remove("hidden");
 
         elements.chromiumLimitSection
           .classList
@@ -1633,6 +1654,10 @@
           .add("hidden");
 
         elements.subscribeSection
+          .classList
+          .add("hidden");
+
+        elements.chromiumFirefoxSection
           .classList
           .add("hidden");
 
