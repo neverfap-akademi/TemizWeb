@@ -608,31 +608,62 @@ def build_social_search_query_rules() -> list[tuple[str, str]]:
 
     for host, selectors in search_inputs.items():
         for selector in selectors:
-            for family_name, patterns in families.items():
-                chain = (
-                    f"{selector}:watch-attr(value)"
-                )
+            for family_name, patterns in search_families.items():
+                # JavaScript DOM property:
+                # Required especially for YouTube, whose live search value
+                # may not be reflected into the HTML value attribute.
+                property_chain = selector
 
                 for pattern in patterns:
-                    chain += (
-                        f":matches-attr(value=/{pattern}/iu)"
+                    property_chain += (
+                        f":matches-prop(value=/{pattern}/iu)"
                     )
 
-                chain += (
-                    f":not(:matches-attr(value=/{safe}/iu))"
+                property_chain += (
+                    f":not(:matches-prop(value=/{safe}/iu))"
                 )
 
-                chain += (
+                property_chain += (
                     ":upward(html) > body"
                 )
 
                 rules.append(
                     (
                         (
-                            f"{host} / search query / "
+                            f"{host} / search property / "
                             f"{family_name}"
                         ),
-                        f"{host}#?#{chain}",
+                        f"{host}#?#{property_chain}",
+                    )
+                )
+
+                # HTML attribute fallback:
+                # Retained for platforms such as Instagram where the live
+                # query may also be reflected into the value attribute.
+                attribute_chain = (
+                    f"{selector}:watch-attr(value)"
+                )
+
+                for pattern in patterns:
+                    attribute_chain += (
+                        f":matches-attr(value=/{pattern}/iu)"
+                    )
+
+                attribute_chain += (
+                    f":not(:matches-attr(value=/{safe}/iu))"
+                )
+
+                attribute_chain += (
+                    ":upward(html) > body"
+                )
+
+                rules.append(
+                    (
+                        (
+                            f"{host} / search attribute / "
+                            f"{family_name}"
+                        ),
+                        f"{host}#?#{attribute_chain}",
                     )
                 )
 
