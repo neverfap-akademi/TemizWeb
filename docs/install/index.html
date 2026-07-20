@@ -776,84 +776,48 @@
         id="chromium-limit-section"
         class="section hidden"
       >
-        <h2>
-          3. Chrome veya Edge kurulumu
-        </h2>
+        <h2>3. Chrome veya Edge kurulumu</h2>
 
-        <div class="notice warning">
-          <strong>İki seçenek vardır:</strong>
-          Firefox’ta TemizWeb abonelik olarak eklenir ve
-          GitHub’daki güncellemeleri otomatik alır. Chrome ve
-          Edge’de ise filtre metni elle eklenebilir; yeni
-          TemizWeb sürümleri çıktığında bu işlem tekrarlanmalıdır.
+        <div class="notice">
+          <strong>Chrome/Edge kurulumu desteklenir.</strong>
+          TemizWeb listesini URL ile uBlock Origin Lite'a eklediğinizde
+          liste güncellemeleri aynı adresten alınabilir. Firefox yine de
+          TemizWeb'in gelişmiş kuralları ve en kolay kurulum deneyimi için
+          önerilen seçenektir.
         </div>
 
         <div class="choice-grid">
-          <div class="choice-card recommended">
-            <span class="badge">
-              Önerilen ve otomatik güncellenen
-            </span>
-
-            <h3>Firefox + uBlock Origin</h3>
-
-            <p>
-              En kolay ve eksiksiz yöntemdir. TemizWeb liste
-              aboneliği olarak eklenir ve güncel kalır.
-            </p>
-
-            <div class="button-row two">
-              <a
-                id="chromium-firefox-download"
-                class="button"
-                href="https://www.mozilla.org/tr/firefox/new/"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Firefox’u indir
-              </a>
-
-              <a
-                class="button secondary"
-                href="https://addons.mozilla.org/tr/firefox/addon/ublock-origin/"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                uBlock Origin’i yükle
-              </a>
-            </div>
-          </div>
-
           <div class="choice-card">
-            <h3>Chrome/Edge — elle kurulum</h3>
-
+            <span class="badge">Chrome / Edge</span>
+            <h3>uBlock Origin Lite + TemizWeb URL'si</h3>
             <p>
-              uBlock Origin Lite harici abonelik bağlantısını
-              açmaz. Bunun yerine seçtiğiniz TemizWeb kurallarını
-              kopyalayıp eklentinin özel filtre alanına yapıştırın.
+              Abonelik düğmesi uBlock Origin Lite'ta açılmaz. Bunun yerine
+              seçtiğiniz TemizWeb TXT adresini eklentinin filtre listeleri
+              bölümüne bir kez ekleyin.
             </p>
 
             <div class="steps">
               <div class="step">
-                <strong>uBlock Origin Lite’ı kurun</strong>
+                <strong>uBlock Origin Lite'ı kurun</strong>
+                <span>Chrome Web Mağazası sayfasından tarayıcınıza ekleyin.</span>
+              </div>
+              <div class="step">
+                <strong>Eklenti ayarlarını açın</strong>
                 <span>
-                  Eklenti sayfasını açın ve tarayıcınıza ekleyin.
+                  uBlock Origin Lite simgesi → Ayarlar → Filtre listeleri.
                 </span>
               </div>
-
               <div class="step">
-                <strong>TemizWeb kurallarını kopyalayın</strong>
+                <strong>Süzgeç listesi ekle bölümünü açın</strong>
                 <span>
-                  Aşağıdaki düğme seçtiğiniz güncel filtre
-                  dosyasının tamamını panoya kopyalar.
+                  “Süzgeç listesi ekle” seçeneğine basın.
                 </span>
               </div>
-
               <div class="step">
-                <strong>Özel filtre alanına yapıştırın</strong>
+                <strong>TemizWeb TXT bağlantısını yapıştırın</strong>
                 <span>
-                  uBlock Origin Lite seçeneklerini açın. “My
-                  filters”, “Özel filtreler” veya benzer adlı
-                  alana yapıştırıp kaydedin.
+                  Aşağıdaki düğmeyle seçtiğiniz listenin URL'sini kopyalayın,
+                  alana yapıştırın ve “Ekle” düğmesine basın.
                 </span>
               </div>
             </div>
@@ -865,7 +829,7 @@
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                uBlock Origin Lite’ı aç
+                uBlock Origin Lite'ı yükle
               </a>
 
               <button
@@ -873,7 +837,7 @@
                 class="button"
                 type="button"
               >
-                TemizWeb kurallarını kopyala
+                TemizWeb liste URL'sini kopyala
               </button>
 
               <a
@@ -883,7 +847,7 @@
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Filtre dosyasını aç
+                TXT listesini aç
               </a>
             </div>
 
@@ -892,6 +856,30 @@
               class="notice hidden"
               aria-live="polite"
             ></div>
+          </div>
+
+          <div class="choice-card recommended">
+            <span class="badge">Önerilen</span>
+            <h3>Firefox + uBlock Origin</h3>
+            <p>
+              Tek düğmeli abonelik, gelişmiş uBlock kuralları ve Android
+              desteği için en kolay yöntemdir.
+            </p>
+            <div class="button-row two">
+              <a
+                id="chromium-firefox-download"
+                class="button"
+                href="https://www.mozilla.org/tr/firefox/new/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >Firefox'u indir</a>
+              <a
+                class="button secondary"
+                href="https://addons.mozilla.org/tr/firefox/addon/ublock-origin/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >uBlock Origin'i yükle</a>
+            </div>
           </div>
         </div>
       </section>
@@ -1583,9 +1571,9 @@
             "<strong>" +
             browserName +
             " algılandı.</strong> " +
-            "Firefox önerilir; ancak masaüstünde Chrome veya " +
-            "Edge için elle filtre ekleme seçeneğini de " +
-            "kullanabilirsiniz." +
+            "Chrome/Edge kurulumu desteklenir. TemizWeb TXT " +
+            "bağlantısını uBlock Origin Lite filtre listelerine " +
+            "ekleyebilirsiniz. Firefox yine de önerilir." +
           "</div>";
 
         elements.androidSettingsSection
@@ -1735,86 +1723,27 @@
         .addEventListener(
           "click",
           async function () {
-            const button =
-              elements.chromiumCopyFilter;
-
-            const originalText =
-              button.textContent;
-
-            button.disabled = true;
-            button.textContent =
-              "Kurallar hazırlanıyor…";
-
             try {
-              const response =
-                await fetch(
-                  selectedFilter.url,
-                  {
-                    cache: "no-store"
-                  }
-                );
-
-              if (!response.ok) {
-                throw new Error(
-                  "Filtre indirilemedi."
-                );
-              }
-
-              const filterText =
-                await response.text();
-
               await navigator.clipboard.writeText(
-                filterText
+                selectedFilter.url
               );
 
               elements.chromiumCopyStatus
                 .classList
                 .remove("hidden");
 
-              elements.chromiumCopyStatus
-                .classList
-                .remove("warning");
-
-              elements.chromiumCopyStatus
-                .textContent =
-                  "TemizWeb kuralları panoya kopyalandı. " +
-                  "Şimdi uBlock Origin Lite’ın özel filtre " +
-                  "alanına yapıştırıp kaydedin.";
-
-              button.textContent =
-                "Kopyalandı";
+              elements.chromiumCopyStatus.textContent =
+                "TemizWeb TXT liste bağlantısı kopyalandı. " +
+                "uBlock Origin Lite → Ayarlar → Filtre listeleri → " +
+                "Süzgeç listesi ekle alanına yapıştırın ve Ekle'ye basın.";
             } catch (error) {
               elements.chromiumCopyStatus
                 .classList
                 .remove("hidden");
 
-              elements.chromiumCopyStatus
-                .classList
-                .add("warning");
-
-              elements.chromiumCopyStatus
-                .innerHTML =
-                  "Otomatik kopyalama başarısız oldu. " +
-                  "“Filtre dosyasını aç” düğmesine basın, " +
-                  "tüm metni seçip elle kopyalayın.";
-
-              button.textContent =
-                originalText;
-            } finally {
-              window.setTimeout(
-                function () {
-                  button.disabled = false;
-
-                  if (
-                    button.textContent ===
-                    "Kopyalandı"
-                  ) {
-                    button.textContent =
-                      originalText;
-                  }
-                },
-                2500
-              );
+              elements.chromiumCopyStatus.textContent =
+                "Bağlantı otomatik kopyalanamadı. TXT listesini açın ve " +
+                "adres çubuğundaki bağlantıyı kopyalayın.";
             }
           }
         );
