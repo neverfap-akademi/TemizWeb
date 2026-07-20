@@ -549,24 +549,43 @@ def _content_rule(
 
 
 def build_social_search_query_rules() -> list[tuple[str, str]]:
-    """Block strongly PMO-risky searches on supported social platforms.
-
-    These rules inspect the search field value itself instead of relying
-    only on result-card titles.
-
-    They are generated into 25-social-content.txt, so they appear in:
-    - temizweb-pmo.txt
-    - temizweb-main.txt
-
-    They do not appear in temizweb-social.txt.
-
-    Recovery, legal-help, victim-support and educational queries remain
-    allowed through the shared SAFE pattern.
-    """
+    """Block strongly PMO-risky searches on supported social platforms."""
 
     families = build_pattern_families()
     safe = build_safe_pattern()
     rules: list[tuple[str, str]] = []
+
+    strong_search_direct = (
+        r"(?:"
+        r"porno(?:grafi)?|"
+        r"porn(?:ography)?|"
+        r"xxx|"
+        r"hardcore|"
+        r"softcore|"
+        r"hentai|"
+        r"rule[\s-]*34|"
+        r"pornhub|"
+        r"xvideos|"
+        r"xnxx|"
+        r"xhamster|"
+        r"redtube|"
+        r"youporn|"
+        r"brazzers|"
+        r"gonewild|"
+        r"onlyfans.{0,50}(?:if[şs]a|leak|leaked|nude|porn)|"
+        r"(?:if[şs]a|leak|leaked|free).{0,50}onlyfans|"
+        r"webcam\s+sex|"
+        r"sex\s+cams?|"
+        r"camgirls?"
+        r")"
+    )
+
+    search_families = {
+        "strong_direct": (
+            strong_search_direct,
+        ),
+        **families,
+    }
 
     search_inputs = {
         "youtube.com": (
