@@ -631,6 +631,19 @@
       </div>
 
       <section class="section">
+        <h2>Önce eski TemizWeb listesini kontrol edin</h2>
+
+        <div class="notice warning">
+          <strong>Daha önce başka bir TemizWeb filtre modu kurduysanız kaldırın.</strong>
+          uBlock Origin veya uBlock Origin Lite ayarlarında
+          <strong>Filtre listeleri</strong> bölümünü açın ve eski
+          TemizWeb listesini kaldırın. Aynı anda yalnızca bir TemizWeb modu
+          kullanın; iki farklı TemizWeb listesi birlikte etkin olduğunda
+          kurallar çakışabilir.
+        </div>
+      </section>
+
+      <section class="section">
         <h2>1. Tarayıcı ve eklenti</h2>
 
         <div id="guidance-content"></div>
@@ -791,9 +804,8 @@
             <span class="badge">Chrome / Edge</span>
             <h3>uBlock Origin Lite + TemizWeb URL'si</h3>
             <p>
-              Abonelik düğmesi uBlock Origin Lite'ta açılmaz. Bunun yerine
-              seçtiğiniz TemizWeb TXT adresini eklentinin filtre listeleri
-              bölümüne bir kez ekleyin.
+              TemizWeb listesini URL olarak uBlock Origin Lite'a ekleyebilirsiniz.
+              Liste aynı GitHub adresinden güncellenmeye devam eder.
             </p>
 
             <div class="steps">
@@ -802,22 +814,35 @@
                 <span>Chrome Web Mağazası sayfasından tarayıcınıza ekleyin.</span>
               </div>
               <div class="step">
-                <strong>Eklenti ayarlarını açın</strong>
+                <strong>Geliştirici modunu açın</strong>
+                <span>
+                  Chrome menüsü (üç nokta) → Uzantılar →
+                  Uzantıları yönet → sağ üstte Geliştirici modu.
+                </span>
+              </div>
+              <div class="step">
+                <strong>uBlock Origin Lite izinlerini açın</strong>
+                <span>
+                  Uzantılar → uBlock Origin Lite → Ayrıntılar bölümünde
+                  “Gizli modda izin ver”, “Dosya URL'lerine erişime izin ver”
+                  ve “Kullanıcı komut dosyalarına izin ver” seçeneklerini açın.
+                </span>
+              </div>
+              <div class="step">
+                <strong>Filtre listeleri bölümünü açın</strong>
                 <span>
                   uBlock Origin Lite simgesi → Ayarlar → Filtre listeleri.
                 </span>
               </div>
               <div class="step">
                 <strong>Süzgeç listesi ekle bölümünü açın</strong>
-                <span>
-                  “Süzgeç listesi ekle” seçeneğine basın.
-                </span>
+                <span>“Süzgeç listesi ekle” seçeneğine basın.</span>
               </div>
               <div class="step">
-                <strong>TemizWeb TXT bağlantısını yapıştırın</strong>
+                <strong>TemizWeb liste URL'sini yapıştırın</strong>
                 <span>
-                  Aşağıdaki düğmeyle seçtiğiniz listenin URL'sini kopyalayın,
-                  alana yapıştırın ve “Ekle” düğmesine basın.
+                  Aşağıdaki düğmeyle URL'yi kopyalayın, alana yapıştırın
+                  ve “Ekle” düğmesine basın.
                 </span>
               </div>
             </div>
@@ -839,16 +864,6 @@
               >
                 TemizWeb liste URL'sini kopyala
               </button>
-
-              <a
-                id="chromium-open-raw"
-                class="button secondary"
-                href="#"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                TXT listesini aç
-              </a>
             </div>
 
             <div
@@ -890,11 +905,10 @@
         </h2>
 
         <div class="notice">
-          <strong>Önerilen:</strong>
-
-          Varsayılan listeleri olduğu gibi bırakabilirsiniz.
-          Bunlar reklam, takip ve bazı kötü amaçlı adreslere
-          karşı ek koruma sağlar.
+          uBlock Origin varsayılan olarak reklamları da engelleyen
+          filtreler içerir. Reklam engelleme TemizWeb'in temel amacı
+          değildir. Bu ek filtreleri istemiyorsanız aşağıdaki yönergeyi
+          izleyerek kapatabilirsiniz.
         </div>
 
         <details>
@@ -945,34 +959,29 @@
 
       <section class="section">
         <h2 id="test-heading">
-          5. Kurulumu test edin
+          5. Kurulum tamamlandı
         </h2>
+
+        <div class="notice">
+          TemizWeb filtresi eklendiğinde kurulum tamamlanır.
+          Filtre listesi açık kaldığı sürece aynı URL üzerinden
+          güncellemeler alınır.
+        </div>
 
         <div class="steps">
           <div class="step">
-            <strong>YouTube’u kontrol edin</strong>
-
+            <strong>Tek TemizWeb modu kullanın</strong>
             <span>
-              Tam Koruma veya Sosyal Medya modunda ana akış
-              ve Shorts düğmesi gizlenmelidir.
+              Daha sonra farklı bir moda geçerseniz önce eski TemizWeb
+              listesini Filtre listeleri bölümünden kaldırın.
             </span>
           </div>
 
           <div class="step">
-            <strong>Instagram’ı kontrol edin</strong>
-
+            <strong>Tarayıcıyı normal biçimde kullanın</strong>
             <span>
-              Ana akış gizlenmeli; hesap arama alanı
-              kullanılabilmelidir.
-            </span>
-          </div>
-
-          <div class="step">
-            <strong>PMO sorgusunu kontrol edin</strong>
-
-            <span>
-              PMO veya Tam Koruma modunda güçlü PMO
-              aramaları engellenmelidir.
+              SafeSearch veya YouTube Kısıtlı Mod zorlanmaz.
+              Arama, kanal, profil, mesaj ve paylaşım işlevleri korunur.
             </span>
           </div>
         </div>
@@ -1212,11 +1221,6 @@
             "chromium-copy-filter"
           ),
 
-        chromiumOpenRaw:
-          document.getElementById(
-            "chromium-open-raw"
-          ),
-
         chromiumCopyStatus:
           document.getElementById(
             "chromium-copy-status"
@@ -1258,9 +1262,6 @@
         encodeURIComponent(
           selectedFilter.title
         );
-
-      elements.chromiumOpenRaw.href =
-        selectedFilter.url;
 
       function detectEnvironment() {
         const ua =
@@ -1448,7 +1449,7 @@
             "5. Diğer uBlock filtreleri";
 
           elements.testHeading.textContent =
-            "6. Kurulumu test edin";
+            "6. Kurulum tamamlandı";
 
           return;
         }
@@ -1463,7 +1464,7 @@
           "4. Diğer uBlock filtreleri";
 
         elements.testHeading.textContent =
-          "5. Kurulumu test edin";
+          "5. Kurulum tamamlandı";
       }
 
       function renderFirefox(
@@ -1571,9 +1572,9 @@
             "<strong>" +
             browserName +
             " algılandı.</strong> " +
-            "Chrome/Edge kurulumu desteklenir. TemizWeb TXT " +
-            "bağlantısını uBlock Origin Lite filtre listelerine " +
-            "ekleyebilirsiniz. Firefox yine de önerilir." +
+            "Chrome/Edge kurulumu desteklenir. TemizWeb liste URL'sini " +
+            "uBlock Origin Lite filtre listelerine ekleyebilirsiniz. " +
+            "Firefox yine de önerilir." +
           "</div>";
 
         elements.androidSettingsSection
@@ -1733,7 +1734,7 @@
                 .remove("hidden");
 
               elements.chromiumCopyStatus.textContent =
-                "TemizWeb TXT liste bağlantısı kopyalandı. " +
+                "TemizWeb liste URL\'si kopyalandı. " +
                 "uBlock Origin Lite → Ayarlar → Filtre listeleri → " +
                 "Süzgeç listesi ekle alanına yapıştırın ve Ekle'ye basın.";
             } catch (error) {
@@ -1742,8 +1743,9 @@
                 .remove("hidden");
 
               elements.chromiumCopyStatus.textContent =
-                "Bağlantı otomatik kopyalanamadı. TXT listesini açın ve " +
-                "adres çubuğundaki bağlantıyı kopyalayın.";
+                "Bağlantı otomatik kopyalanamadı. URL\'yi seçip " +
+                "elle kopyalamak için tarayıcınızın kopyalama iznini kontrol edin.";
+
             }
           }
         );
