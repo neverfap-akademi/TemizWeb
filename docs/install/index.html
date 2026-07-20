@@ -495,6 +495,41 @@
       font-size: 14px;
     }
 
+    .ios-filter-groups {
+      display: grid;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .ios-filter-group {
+      margin-top: 0;
+    }
+
+    .ios-filter-group summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .ios-filter-count {
+      flex: 0 0 auto;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .ios-filter-actions {
+      display: grid;
+      gap: 9px;
+      padding: 0 16px 16px;
+    }
+
+    .ios-filter-actions .button {
+      min-height: 46px;
+      font-size: 14px;
+    }
+
     .hidden {
       display: none !important;
     }
@@ -917,9 +952,9 @@
 
         <div class="notice warning">
           <strong>iPhone/iPad kurulumu elle yapılır.</strong>
-          Safari sürümünde TemizWeb liste URL'si abonelik olarak eklenmez.
-          Seçtiğiniz filtrenin bütün içeriğini kopyalayıp uBlock Origin Lite
-          içindeki Özel filtreler alanına yapıştırmanız gerekir.
+          Safari'deki Özel filtreler ekranı yapıştırılan kuralları
+          tek tek ve site grupları hâlinde işler. Bu nedenle bütün listeyi
+          tek seferde yapıştırmak yerine aşağıdaki küçük grupları sırayla ekleyin.
         </div>
 
         <div class="steps">
@@ -934,25 +969,25 @@
           <div class="step">
             <strong>İlk kurulum izinlerini geçtiyseniz Safari ayarlarını açın</strong>
             <span>
-              iPhone veya iPad Ayarları → Uygulamalar → Safari →
-              Genişletmeler → uBlock Origin Lite. Genişletmeyi etkinleştirin,
-              gerekli Safari izinlerini verin ve
-              “Özel dolaşımda da izin ver” seçeneğini açın.
+              Ayarlar → Uygulamalar → Safari → Genişletmeler →
+              uBlock Origin Lite. Genişletmeyi etkinleştirin, gerekli
+              Safari izinlerini verin ve “Özel dolaşımda da izin ver”
+              seçeneğini açın.
             </span>
           </div>
 
           <div class="step">
             <strong>Safari'de uBlock Origin Lite'ı açın</strong>
             <span>
-              Safari'yi açın. Adres çubuğunun solundaki sayfa veya
-              genişletmeler simgesine basın ve uBlock Origin Lite'ı seçin.
+              Safari adres çubuğunun solundaki sayfa veya genişletmeler
+              simgesine basın ve uBlock Origin Lite'ı seçin.
             </span>
           </div>
 
           <div class="step">
             <strong>Sağ alttan Kontrol Paneli'ni açın</strong>
             <span>
-              uBlock Origin Lite penceresinin sağ alt bölümündeki
+              uBlock Origin Lite penceresinin sağ altındaki
               Kontrol Paneli düğmesine basın.
             </span>
           </div>
@@ -960,16 +995,17 @@
           <div class="step">
             <strong>Özel filtreler bölümüne girin</strong>
             <span>
-              Kontrol Paneli içinde Özel filtreler bölümünü açın.
+              Kontrol Paneli içinde Özel filtreler bölümünü açın ve
+              İçeri/Dışarı Aktar seçeneğine basın.
             </span>
           </div>
 
           <div class="step">
-            <strong>İçeri/Dışarı Aktar düğmesine basın</strong>
+            <strong>Filtre gruplarını sırayla yapıştırın</strong>
             <span>
-              Aşağıdaki düğmeyle seçtiğiniz TemizWeb listesinin bütün
-              içeriğini kopyalayın. İçeri/Dışarı Aktar alanına yapıştırın
-              ve değişiklikleri uygulayın.
+              Aşağıdan bir grubu kopyalayın, uBlock Origin Lite'a dönüp
+              yapıştırın ve uygulayın. Ardından bu sayfaya dönerek sıradaki
+              grubu ekleyin.
             </span>
           </div>
         </div>
@@ -986,11 +1022,11 @@
           </a>
 
           <button
-            id="ios-copy-filter"
+            id="ios-prepare-groups"
             class="button"
             type="button"
           >
-            TemizWeb filtre içeriğini kopyala
+            Safari için filtre gruplarını hazırla
           </button>
         </div>
 
@@ -1000,9 +1036,23 @@
           aria-live="polite"
         ></div>
 
+        <div
+          id="ios-filter-groups"
+          class="ios-filter-groups hidden"
+        ></div>
+
+        <div class="notice warning">
+          <strong>Yanlış veya çok büyük bir yapıştırmayı tamamen temizlemek için:</strong>
+          Ayarlar → Uygulamalar → Safari → Genişletmeler →
+          uBlock Origin Lite bölümüne girin, genişletmeyi kapatın ve
+          <strong>Saklama alanını sil</strong> seçeneğine basın.
+          Bu işlem uBlock Origin Lite'ın özel filtrelerini ve kayıtlı
+          ayarlarını sıfırlar; ardından izinleri yeniden açmanız gerekir.
+        </div>
+
         <div class="notice">
-          iPhone ve iPad'de filtre içeriği elle yapıştırıldığı için
-          TemizWeb güncellendiğinde bu işlemi yeniden yapmanız gerekir.
+          iPhone ve iPad'de filtreler elle eklendiğinden TemizWeb
+          güncellendiğinde grupları yeniden hazırlayıp eklemeniz gerekir.
           Safari'nin filtre sistemi Firefox'taki tam uBlock Origin'den
           farklı olduğundan bazı gelişmiş kurallar çalışmayabilir.
         </div>
@@ -1361,14 +1411,19 @@
             "ios-appstore-button"
           ),
 
-        iosCopyFilter:
+        iosPrepareGroups:
           document.getElementById(
-            "ios-copy-filter"
+            "ios-prepare-groups"
           ),
 
         iosCopyStatus:
           document.getElementById(
             "ios-copy-status"
+          ),
+
+        iosFilterGroups:
+          document.getElementById(
+            "ios-filter-groups"
           ),
 
         otherListsHeading:
@@ -2011,47 +2066,398 @@
           }
         );
 
-      elements.iosCopyFilter
+      function safariGroupName(
+        line
+      ) {
+        const cosmeticMatch =
+          line.match(
+            /^([^#\s]+?)(?:##|#@#|#\?#|#\$#|#%#|#\^#)/
+          );
+
+        if (cosmeticMatch) {
+          const domainPart =
+            cosmeticMatch[1];
+
+          if (
+            domainPart.includes(",") ||
+            domainPart.includes("*")
+          ) {
+            return "Çoklu site kuralları";
+          }
+
+          const firstDomain =
+            domainPart
+              .replace(/^~/, "")
+              .split(",")[0];
+
+          if (firstDomain) {
+            return firstDomain;
+          }
+        }
+
+        const networkMatch =
+          line.match(
+            /^\|\|([a-z0-9.-]+)\^/i
+          );
+
+        if (networkMatch) {
+          return networkMatch[1];
+        }
+
+        if (
+          /\$domain=/i.test(line)
+        ) {
+          return "Siteye bağlı ağ kuralları";
+        }
+
+        return "Genel kurallar";
+      }
+
+      function buildSafariGroups(
+        filterText
+      ) {
+        const groups =
+          new Map();
+
+        const lines =
+          filterText
+            .split(/\r?\n/)
+            .map(
+              function (line) {
+                return line.trim();
+              }
+            )
+            .filter(
+              function (line) {
+                return (
+                  line &&
+                  !line.startsWith("!")
+                );
+              }
+            );
+
+        for (
+          const line of lines
+        ) {
+          const groupName =
+            safariGroupName(
+              line
+            );
+
+          if (
+            !groups.has(
+              groupName
+            )
+          ) {
+            groups.set(
+              groupName,
+              []
+            );
+          }
+
+          groups
+            .get(
+              groupName
+            )
+            .push(
+              line
+            );
+        }
+
+        const chunks =
+          [];
+
+        const maximumLinesPerChunk =
+          40;
+
+        const sortedGroups =
+          Array.from(
+            groups.entries()
+          )
+            .sort(
+              function (a, b) {
+                if (
+                  a[0] === "Genel kurallar"
+                ) {
+                  return 1;
+                }
+
+                if (
+                  b[0] === "Genel kurallar"
+                ) {
+                  return -1;
+                }
+
+                return a[0]
+                  .localeCompare(
+                    b[0],
+                    "tr"
+                  );
+              }
+            );
+
+        for (
+          const entry of sortedGroups
+        ) {
+          const groupName =
+            entry[0];
+
+          const groupLines =
+            entry[1];
+
+          const partCount =
+            Math.ceil(
+              groupLines.length /
+              maximumLinesPerChunk
+            );
+
+          for (
+            let index = 0;
+            index < partCount;
+            index += 1
+          ) {
+            const partLines =
+              groupLines.slice(
+                index *
+                  maximumLinesPerChunk,
+                (
+                  index + 1
+                ) *
+                  maximumLinesPerChunk
+              );
+
+            chunks.push(
+              {
+                title:
+                  partCount > 1
+                    ? (
+                        groupName +
+                        " — " +
+                        (
+                          index + 1
+                        ) +
+                        "/" +
+                        partCount
+                      )
+                    : groupName,
+
+                lines:
+                  partLines
+              }
+            );
+          }
+        }
+
+        return chunks;
+      }
+
+      function renderSafariGroups(
+        chunks
+      ) {
+        elements.iosFilterGroups
+          .replaceChildren();
+
+        chunks.forEach(
+          function (
+            chunk,
+            index
+          ) {
+            const details =
+              document.createElement(
+                "details"
+              );
+
+            details.className =
+              "ios-filter-group";
+
+            const summary =
+              document.createElement(
+                "summary"
+              );
+
+            const title =
+              document.createElement(
+                "span"
+              );
+
+            title.textContent =
+              (
+                index + 1
+              ) +
+              ". " +
+              chunk.title;
+
+            const count =
+              document.createElement(
+                "span"
+              );
+
+            count.className =
+              "ios-filter-count";
+
+            count.textContent =
+              chunk.lines.length +
+              " kural";
+
+            summary.append(
+              title,
+              count
+            );
+
+            const actions =
+              document.createElement(
+                "div"
+              );
+
+            actions.className =
+              "ios-filter-actions";
+
+            const explanation =
+              document.createElement(
+                "p"
+              );
+
+            explanation.textContent =
+              "Bu grubu kopyalayın, Safari'deki İçeri/Dışarı Aktar alanına yapıştırın ve uygulayın.";
+
+            const button =
+              document.createElement(
+                "button"
+              );
+
+            button.type =
+              "button";
+
+            button.className =
+              "button";
+
+            button.textContent =
+              "Bu grubu kopyala";
+
+            button.addEventListener(
+              "click",
+              async function () {
+                try {
+                  await navigator.clipboard
+                    .writeText(
+                      chunk.lines.join(
+                        "\n"
+                      )
+                    );
+
+                  button.textContent =
+                    "Kopyalandı ✓";
+
+                  elements.iosCopyStatus
+                    .classList
+                    .remove(
+                      "hidden"
+                    );
+
+                  elements.iosCopyStatus
+                    .textContent =
+                      (
+                        index + 1
+                      ) +
+                      "/" +
+                      chunks.length +
+                      " numaralı grup kopyalandı. Safari'ye dönüp yapıştırın ve uygulayın.";
+
+                  window.setTimeout(
+                    function () {
+                      button.textContent =
+                        "Bu grubu kopyala";
+                    },
+                    2500
+                  );
+                } catch (error) {
+                  elements.iosCopyStatus
+                    .classList
+                    .remove(
+                      "hidden"
+                    );
+
+                  elements.iosCopyStatus
+                    .textContent =
+                      "Kopyalama başarısız oldu. Safari'nin pano iznini kontrol edip tekrar deneyin.";
+                }
+              }
+            );
+
+            actions.append(
+              explanation,
+              button
+            );
+
+            details.append(
+              summary,
+              actions
+            );
+
+            elements.iosFilterGroups
+              .append(
+                details
+              );
+          }
+        );
+
+        elements.iosFilterGroups
+          .classList
+          .remove(
+            "hidden"
+          );
+      }
+
+      elements.iosPrepareGroups
         .addEventListener(
           "click",
           async function () {
             elements.iosCopyStatus
               .classList
-              .remove("hidden");
+              .remove(
+                "hidden"
+              );
 
             elements.iosCopyStatus.textContent =
-              "TemizWeb filtre içeriği hazırlanıyor…";
+              "TemizWeb kuralları site gruplarına ayrılıyor…";
 
             try {
               const response =
                 await fetch(
                   selectedFilter.url,
                   {
-                    cache: "no-store"
+                    cache:
+                      "no-store"
                   }
                 );
 
-              if (!response.ok) {
+              if (
+                !response.ok
+              ) {
                 throw new Error(
-                  "HTTP " + response.status
+                  "HTTP " +
+                  response.status
                 );
               }
 
               const filterText =
                 await response.text();
 
-              await navigator.clipboard.writeText(
-                filterText
+              const chunks =
+                buildSafariGroups(
+                  filterText
+                );
+
+              renderSafariGroups(
+                chunks
               );
 
               elements.iosCopyStatus.textContent =
-                "TemizWeb filtre içeriği kopyalandı. " +
-                "Safari → uBlock Origin Lite → Kontrol Paneli → " +
-                "Özel filtreler → İçeri/Dışarı Aktar alanına yapıştırın.";
+                chunks.length +
+                " küçük grup hazırlandı. Grupları yukarıdan aşağıya sırayla kopyalayıp Safari'ye ekleyin.";
             } catch (error) {
               elements.iosCopyStatus.textContent =
-                "Filtre içeriği otomatik kopyalanamadı. " +
-                "Safari'nin pano iznini kontrol edip düğmeye tekrar basın.";
+                "Filtre grupları hazırlanamadı. İnternet bağlantısını kontrol edip tekrar deneyin.";
             }
           }
         );
