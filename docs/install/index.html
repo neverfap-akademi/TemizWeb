@@ -2422,14 +2422,48 @@
               "TemizWeb kuralları site gruplarına ayrılıyor…";
 
             try {
-              const response =
-                await fetch(
-                  selectedFilter.url,
-                  {
-                    cache:
-                      "no-store"
-                  }
-                );
+              const sameOriginFilterUrl =
+                new URL(
+                  "../filters/dist/" +
+                  (
+                    requestedFilter === "pmo"
+                      ? "temizweb-pmo.txt"
+                      : requestedFilter === "social"
+                        ? "temizweb-social.txt"
+                        : "temizweb-main.txt"
+                  ),
+                  window.location.href
+                ).href;
+
+              let response;
+
+              try {
+                response =
+                  await fetch(
+                    sameOriginFilterUrl,
+                    {
+                      cache:
+                        "no-store"
+                    }
+                  );
+              } catch (sameOriginError) {
+                response =
+                  null;
+              }
+
+              if (
+                !response ||
+                !response.ok
+              ) {
+                response =
+                  await fetch(
+                    selectedFilter.url,
+                    {
+                      cache:
+                        "no-store"
+                    }
+                  );
+              }
 
               if (
                 !response.ok
@@ -2442,6 +2476,14 @@
 
               const filterText =
                 await response.text();
+
+              if (
+                !filterText.trim()
+              ) {
+                throw new Error(
+                  "Boş filtre dosyası"
+                );
+              }
 
               const chunks =
                 buildSafariGroups(
@@ -2457,7 +2499,14 @@
                 " küçük grup hazırlandı. Grupları yukarıdan aşağıya sırayla kopyalayıp Safari'ye ekleyin.";
             } catch (error) {
               elements.iosCopyStatus.textContent =
-                "Filtre grupları hazırlanamadı. İnternet bağlantısını kontrol edip tekrar deneyin.";
+                "Filtre grupları hazırlanamadı: " +
+                (
+                  error &&
+                  error.message
+                    ? error.message
+                    : "bilinmeyen hata"
+                ) +
+                ". Sayfayı yenileyip tekrar deneyin.";
             }
           }
         );
