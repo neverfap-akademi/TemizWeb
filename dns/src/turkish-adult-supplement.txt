@@ -1,0 +1,2 @@
+# One verified adult domain per line.
+# Do not add general news, health, education, art or social platforms.
