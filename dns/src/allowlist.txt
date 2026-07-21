@@ -1,7 +1,0 @@
-google.com
-google.com.tr
-youtube.com
-youtu.be
-github.com
-githubusercontent.com
-turkiye.gov.tr
