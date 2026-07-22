@@ -917,8 +917,8 @@
 
         <div class="notice warning">
           <strong>iPhone/iPad kurulumu elle yapılır.</strong>
-          Bu sürüm hiçbir filtre dosyasını sonradan indirmez ve tarayıcıda
-          gruplama yapmaz. Filtre parçaları statik sayfaların içinde hazırdır.
+          Safari için hazırlanmış Özel Filtreler uyumlu liste kullanılır.
+          Chrome ve Firefox listeleri bundan etkilenmez.
         </div>
 
         <div class="steps">
@@ -950,8 +950,8 @@
           <div class="step">
             <strong>Özel filtreler → İçeri/Dışarı Aktar</strong>
             <span>
-              Aşağıdaki statik parçalar sayfasını açın. Her parçayı sırayla
-              kopyalayıp bu alana yapıştırın ve uygulayın.
+              Aşağıdaki düğmeyle Safari uyumlu listenin tamamını kopyalayın.
+              İçeri/Dışarı Aktar alanına bir kez yapıştırın ve uygulayın.
             </span>
           </div>
         </div>
@@ -967,14 +967,20 @@
             uBlock Origin Lite'ı App Store'da aç
           </a>
 
-          <a
-            id="ios-static-filter-link"
+          <button
+            id="ios-copy-filter"
             class="button"
-            href="ios-static/main/index.html"
+            type="button"
           >
-            Statik filtre parçalarını aç
-          </a>
+            Safari uyumlu filtreyi kopyala
+          </button>
         </div>
+
+        <div
+          id="ios-copy-status"
+          class="notice hidden"
+          aria-live="polite"
+        ></div>
 
         <div class="notice warning">
           <strong>Özel filtreleri tamamen temizlemek için:</strong>
@@ -984,9 +990,10 @@
         </div>
 
         <div class="notice">
-          PMO ve Tam Koruma listeleri çok büyüktür; bu nedenle onlar çok
-          sayıda statik parçaya ayrılır. Sosyal medya listesi çok daha küçüktür.
-          iOS’ta elle eklenen filtreler otomatik güncellenmez.
+          Safari Özel Filtreler listesi yalnızca Safari'nin doğru
+          sınıflandırabildiği siteye bağlı görünüm/içerik kurallarını içerir.
+          Alan adı engelleme katmanı için TemizWeb DNS ayrıca kurulmalıdır.
+          Elle yapıştırılan liste otomatik güncellenmez.
         </div>
       </section>
 
@@ -1190,7 +1197,10 @@
             "PMO içerik filtresi ve sosyal medya bağımlılık filtresi birlikte kurulacak.",
 
           url:
-            "https://raw.githubusercontent.com/neverfap-akademi/TemizWeb/refs/heads/main/filters/dist/temizweb-main.txt"
+            "https://raw.githubusercontent.com/neverfap-akademi/TemizWeb/refs/heads/main/filters/dist/temizweb-main.txt",
+
+          safariUrl:
+            "https://raw.githubusercontent.com/neverfap-akademi/TemizWeb/refs/heads/main/filters/dist/temizweb-main-safari.txt"
         },
 
         pmo: {
@@ -1201,7 +1211,10 @@
             "PMO içerik filtresi kurulacak. Sosyal medya bağımlılık arayüzü değişiklikleri kurulmayacak.",
 
           url:
-            "https://raw.githubusercontent.com/neverfap-akademi/TemizWeb/refs/heads/main/filters/dist/temizweb-pmo.txt"
+            "https://raw.githubusercontent.com/neverfap-akademi/TemizWeb/refs/heads/main/filters/dist/temizweb-pmo.txt",
+
+          safariUrl:
+            "https://raw.githubusercontent.com/neverfap-akademi/TemizWeb/refs/heads/main/filters/dist/temizweb-pmo-safari.txt"
         },
 
         social: {
@@ -1212,7 +1225,10 @@
             "Yalnızca sosyal medya bağımlılık yüzeylerini azaltan filtre kurulacak.",
 
           url:
-            "https://raw.githubusercontent.com/neverfap-akademi/TemizWeb/refs/heads/main/filters/dist/temizweb-social.txt"
+            "https://raw.githubusercontent.com/neverfap-akademi/TemizWeb/refs/heads/main/filters/dist/temizweb-social.txt",
+
+          safariUrl:
+            "https://raw.githubusercontent.com/neverfap-akademi/TemizWeb/refs/heads/main/filters/dist/temizweb-social-safari.txt"
         }
       };
 
@@ -1343,9 +1359,14 @@
             "ios-appstore-button"
           ),
 
-        iosStaticFilterLink:
+        iosCopyFilter:
           document.getElementById(
-            "ios-static-filter-link"
+            "ios-copy-filter"
+          ),
+
+        iosCopyStatus:
+          document.getElementById(
+            "ios-copy-status"
           ),
 
         otherListsHeading:
@@ -1820,16 +1841,6 @@
         elements.iosAppstoreButton.href =
           links.iosUblock;
 
-        elements.iosStaticFilterLink.href =
-          "ios-static/" +
-          (
-            requestedFilter === "pmo"
-              ? "pmo"
-              : requestedFilter === "social"
-                ? "social"
-                : "main"
-          ) +
-          "/index.html";
       }
 
       function renderOther(
@@ -1995,6 +2006,63 @@
                 "Bağlantı otomatik kopyalanamadı. URL\'yi seçip " +
                 "elle kopyalamak için tarayıcınızın kopyalama iznini kontrol edin.";
 
+            }
+          }
+        );
+
+
+      elements.iosCopyFilter
+        .addEventListener(
+          "click",
+          async function () {
+            elements.iosCopyStatus
+              .classList
+              .remove("hidden");
+
+            elements.iosCopyStatus.textContent =
+              "Safari uyumlu TemizWeb listesi hazırlanıyor…";
+
+            try {
+              const response =
+                await fetch(
+                  selectedFilter.safariUrl,
+                  {
+                    cache: "no-store"
+                  }
+                );
+
+              if (!response.ok) {
+                throw new Error(
+                  "HTTP " + response.status
+                );
+              }
+
+              const filterText =
+                await response.text();
+
+              if (!filterText.trim()) {
+                throw new Error(
+                  "boş filtre dosyası"
+                );
+              }
+
+              await navigator.clipboard.writeText(
+                filterText
+              );
+
+              elements.iosCopyStatus.textContent =
+                "Safari uyumlu liste kopyalandı. " +
+                "uBlock Origin Lite → Kontrol Paneli → Özel filtreler → " +
+                "İçeri/Dışarı Aktar alanına bir kez yapıştırın ve uygulayın.";
+            } catch (error) {
+              elements.iosCopyStatus.textContent =
+                "Liste otomatik kopyalanamadı. Sayfayı yenileyip tekrar deneyin. " +
+                "Hata: " +
+                (
+                  error && error.message
+                    ? error.message
+                    : "bilinmeyen hata"
+                );
             }
           }
         );

@@ -10,6 +10,9 @@ filter_dist_dir = ROOT / "filters" / "dist"
 filter_dist = filter_dist_dir / "temizweb-main.txt"
 pmo_dist = filter_dist_dir / "temizweb-pmo.txt"
 social_dist = filter_dist_dir / "temizweb-social.txt"
+safari_main_dist = filter_dist_dir / "temizweb-main-safari.txt"
+safari_pmo_dist = filter_dist_dir / "temizweb-pmo-safari.txt"
+safari_social_dist = filter_dist_dir / "temizweb-social-safari.txt"
 strict_source = ROOT / "filters" / "src" / "35-strict-page.txt"
 social_addiction = ROOT / "filters" / "src" / "15-social-addiction.txt"
 social_content = ROOT / "filters" / "src" / "25-social-content.txt"
@@ -185,6 +188,51 @@ if pmo_dist.exists() and social_dist.exists() and filter_dist.exists():
         errors.append("social split unexpectedly contains upstream NSFW rules")
     if "Upstream: HaGeZi NSFW" not in pmo_text:
         errors.append("PMO split missing upstream NSFW rules")
+
+
+
+# Safari Custom Filters outputs must contain only concrete site-scoped
+# cosmetic/procedural rules. They intentionally omit network rules, generic
+# rules and cosmetic exceptions because Safari uBOL misclassifies them.
+for safari_path in (safari_main_dist, safari_pmo_dist, safari_social_dist):
+    if not safari_path.exists():
+        errors.append(f"missing {safari_path.relative_to(ROOT)}")
+        continue
+
+    safari_text = safari_path.read_text(encoding="utf-8")
+    safari_rules = active_rules(safari_text)
+
+    if not safari_rules:
+        errors.append(f"{safari_path.name} contains no active rules")
+        continue
+
+    if len(safari_rules) != len(set(safari_rules)):
+        errors.append(f"duplicate rules in {safari_path.name}")
+
+    for rule in safari_rules:
+        if rule.startswith("||") or "$" in rule.split("##", 1)[0]:
+            errors.append(f"network rule leaked into {safari_path.name}: {rule[:120]}")
+            break
+        if "#@#" in rule or "#?#" in rule:
+            errors.append(f"unsupported operator in {safari_path.name}: {rule[:120]}")
+            break
+        if "##" not in rule:
+            errors.append(f"non-cosmetic rule in {safari_path.name}: {rule[:120]}")
+            break
+        domain = rule.split("##", 1)[0]
+        if not domain or "," in domain or domain == "*" or domain.startswith("~"):
+            errors.append(f"unexpanded/invalid domain in {safari_path.name}: {rule[:120]}")
+            break
+
+if safari_social_dist.exists():
+    safari_social_rules = active_rules(
+        safari_social_dist.read_text(encoding="utf-8")
+    )
+    if len(safari_social_rules) != 57:
+        errors.append(
+            "Safari social output no longer matches the proven working "
+            f"57-rule normalized import: {len(safari_social_rules)}"
+        )
 
 files = list((ROOT / "dns" / "dist").glob("*-domains.txt"))
 for path in sorted(files):

@@ -18,6 +18,9 @@ FILTER_DIST_DIR = ROOT / "filters" / "dist"
 FILTER_DIST_MAIN = FILTER_DIST_DIR / "temizweb-main.txt"
 FILTER_DIST_PMO = FILTER_DIST_DIR / "temizweb-pmo.txt"
 FILTER_DIST_SOCIAL = FILTER_DIST_DIR / "temizweb-social.txt"
+FILTER_DIST_MAIN_SAFARI = FILTER_DIST_DIR / "temizweb-main-safari.txt"
+FILTER_DIST_PMO_SAFARI = FILTER_DIST_DIR / "temizweb-pmo-safari.txt"
+FILTER_DIST_SOCIAL_SAFARI = FILTER_DIST_DIR / "temizweb-social-safari.txt"
 
 # Anti-addiction UI files. Everything else remains in the PMO/content list.
 # 10-youtube.txt is retained because the generated 15 layer contains the
@@ -121,6 +124,71 @@ def deduplicate_filter_text(text: str) -> str:
         output.append(line)
 
     return "\n".join(output).rstrip() + "\n"
+
+
+
+SAFARI_COSMETIC_RE = re.compile(
+    r"^(?P<domains>[^#]+?)(?P<operator>#@#|#\?#|##)(?P<body>.+)$"
+)
+SAFARI_DOMAIN_RE = re.compile(
+    r"^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+"
+    r"[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+    re.I,
+)
+
+
+def build_safari_custom_filters(text: str) -> str:
+    """Convert a normal uBlock list to Safari uBOL Custom Filters format.
+
+    Safari's Custom Filters UI works reliably with concrete, site-scoped
+    cosmetic/procedural rules. Network rules, generic rules and exception
+    rules are deliberately omitted. Multi-domain prefixes are expanded so
+    uBlock Origin Lite can place each rule under the correct website card.
+    Procedural #?# rules are normalized to the ## form shown by Safari uBOL.
+    """
+    output: list[str] = []
+    seen: set[str] = set()
+
+    for raw_line in text.splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("!"):
+            continue
+
+        match = SAFARI_COSMETIC_RE.match(line)
+        if not match:
+            continue
+
+        operator = match.group("operator")
+        if operator == "#@#":
+            # Safari Custom Filters does not preserve these exception rules
+            # reliably. The proven working social export contains only active
+            # site-scoped rules.
+            continue
+
+        body = match.group("body").strip()
+        if not body:
+            continue
+
+        for raw_domain in match.group("domains").split(","):
+            domain = raw_domain.strip().lower()
+            if not domain or domain.startswith("~") or domain == "*":
+                continue
+            if not SAFARI_DOMAIN_RE.fullmatch(domain):
+                continue
+
+            safari_rule = f"{domain}##{body}"
+            if safari_rule in seen:
+                continue
+            seen.add(safari_rule)
+            output.append(safari_rule)
+
+    header = (
+        "! Title: TemizWeb Safari Custom Filters\n"
+        "! Generated automatically from the normal TemizWeb list.\n"
+        "! Contains only concrete site-scoped cosmetic/procedural rules.\n"
+        "! Network/DNS rules and cosmetic exceptions are intentionally omitted.\n\n"
+    )
+    return header + "\n".join(output) + "\n"
 
 def protect_generic_content(text: str) -> str:
     """Add the shared recovery override to generic card/article rules.
@@ -251,6 +319,16 @@ def main():
     FILTER_DIST_PMO.write_text(pmo_merged, encoding="utf-8")
     FILTER_DIST_SOCIAL.write_text(social_merged, encoding="utf-8")
 
+    FILTER_DIST_MAIN_SAFARI.write_text(
+        build_safari_custom_filters(main_merged), encoding="utf-8"
+    )
+    FILTER_DIST_PMO_SAFARI.write_text(
+        build_safari_custom_filters(pmo_merged), encoding="utf-8"
+    )
+    FILTER_DIST_SOCIAL_SAFARI.write_text(
+        build_safari_custom_filters(social_merged), encoding="utf-8"
+    )
+
     adult |= read_domains(DNS_SRC / "turkish-adult-supplement.txt")
     allow = read_domains(DNS_SRC / "allowlist.txt")
     vpn = read_domains(DNS_SRC / "vpn-proxy.txt")
@@ -261,7 +339,8 @@ def main():
     write_dns("temizweb-balanced", adult)
     write_dns("temizweb-strict", strict)
     print(
-        f"uBlock main/PMO/social written; {len(external_rules)} upstream rules; "
+        f"uBlock main/PMO/social + Safari custom-filter outputs written; "
+        f"{len(external_rules)} upstream rules; "
         f"DNS balanced: {len(adult)}; strict: {len(strict)}"
     )
 
