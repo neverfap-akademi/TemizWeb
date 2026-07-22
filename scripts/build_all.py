@@ -138,16 +138,20 @@ SAFARI_DOMAIN_RE = re.compile(
 
 
 def build_safari_custom_filters(text: str) -> str:
-    """Convert a normal uBlock list to Safari uBOL Custom Filters format.
+    """Compile normal uBlock rules into Safari uBOL Custom Filters.
 
     Safari's Custom Filters UI works reliably with concrete, site-scoped
-    cosmetic/procedural rules. Network rules, generic rules and exception
-    rules are deliberately omitted. Multi-domain prefixes are expanded so
-    uBlock Origin Lite can place each rule under the correct website card.
-    Procedural #?# rules are normalized to the ## form shown by Safari uBOL.
+    cosmetic/procedural rules. Network and generic rules are omitted.
+
+    Cosmetic exception rules (``#@#``) are not emitted directly because the
+    Safari UI does not preserve them reliably. Instead, they are resolved at
+    build time: an exact site-scoped hide rule cancelled by a matching
+    exception is removed from the Safari output. This preserves intentional
+    restores such as Instagram search and channel Shorts while keeping the
+    narrower homepage/feed rules.
     """
-    output: list[str] = []
-    seen: set[str] = set()
+    parsed_rules: list[tuple[str, str, str]] = []
+    exceptions: set[tuple[str, str]] = set()
 
     for raw_line in text.splitlines():
         line = raw_line.strip()
@@ -159,12 +163,6 @@ def build_safari_custom_filters(text: str) -> str:
             continue
 
         operator = match.group("operator")
-        if operator == "#@#":
-            # Safari Custom Filters does not preserve these exception rules
-            # reliably. The proven working social export contains only active
-            # site-scoped rules.
-            continue
-
         body = match.group("body").strip()
         if not body:
             continue
@@ -176,17 +174,32 @@ def build_safari_custom_filters(text: str) -> str:
             if not SAFARI_DOMAIN_RE.fullmatch(domain):
                 continue
 
-            safari_rule = f"{domain}##{body}"
-            if safari_rule in seen:
-                continue
-            seen.add(safari_rule)
-            output.append(safari_rule)
+            if operator == "#@#":
+                exceptions.add((domain, body))
+            else:
+                parsed_rules.append((domain, operator, body))
+
+    output: list[str] = []
+    seen: set[str] = set()
+
+    for domain, operator, body in parsed_rules:
+        # Resolve exact cosmetic exceptions before serialising for Safari.
+        # Both ## and #?# hide rules normalise to the same Safari ## form.
+        if (domain, body) in exceptions:
+            continue
+
+        safari_rule = f"{domain}##{body}"
+        if safari_rule in seen:
+            continue
+        seen.add(safari_rule)
+        output.append(safari_rule)
 
     header = (
         "! Title: TemizWeb Safari Custom Filters\n"
         "! Generated automatically from the normal TemizWeb list.\n"
-        "! Contains only concrete site-scoped cosmetic/procedural rules.\n"
-        "! Network/DNS rules and cosmetic exceptions are intentionally omitted.\n\n"
+        "! Contains concrete site-scoped cosmetic/procedural rules only.\n"
+        "! Network/DNS rules are omitted; cosmetic exceptions are resolved "
+        "during generation.\n\n"
     )
     return header + "\n".join(output) + "\n"
 

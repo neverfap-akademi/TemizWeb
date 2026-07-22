@@ -228,10 +228,39 @@ if safari_social_dist.exists():
     safari_social_rules = active_rules(
         safari_social_dist.read_text(encoding="utf-8")
     )
-    if len(safari_social_rules) != 57:
+    safari_social_set = set(safari_social_rules)
+
+    # Broad rules cancelled by source #@# exceptions must not leak into the
+    # Safari output. Narrow homepage/feed rules should remain independently.
+    restored_rules = {
+        'instagram.com##a[href="/explore/"]',
+        'instagram.com##a[href^="/explore/"]',
+        'youtube.com##ytd-rich-item-renderer:has(a[href^="/shorts/"])',
+        'youtube.com##ytd-video-renderer:has(a[href^="/shorts/"])',
+        'youtube.com##ytd-reel-item-renderer',
+        'youtube.com##ytd-rich-section-renderer:has(a[href^="/shorts/"])',
+        'm.youtube.com##ytm-rich-item-renderer:has(a[href*="/shorts/"])',
+        'm.youtube.com##ytm-video-with-context-renderer:has(a[href*="/shorts/"])',
+        'm.youtube.com##ytm-reel-item-renderer',
+        'm.youtube.com##ytm-shorts-lockup-view-model',
+    }
+    leaked = sorted(restored_rules & safari_social_set)
+    if leaked:
         errors.append(
-            "Safari social output no longer matches the proven working "
-            f"57-rule normalized import: {len(safari_social_rules)}"
+            "Safari social output ignored cosmetic exceptions: "
+            + ", ".join(leaked)
+        )
+
+    required_narrow_rules = {
+        'instagram.com##:matches-path(/^[/](?:[?].*)?$/) main article',
+        'youtube.com##:matches-path(/^[/](?:[?].*)?$/) ytd-rich-grid-renderer',
+        'm.youtube.com##:matches-path(/^[/](?:[?].*)?$/) ytm-rich-grid-renderer',
+    }
+    missing = sorted(required_narrow_rules - safari_social_set)
+    if missing:
+        errors.append(
+            "Safari social output lost narrow feed rules: "
+            + ", ".join(missing)
         )
 
 files = list((ROOT / "dns" / "dist").glob("*-domains.txt"))
