@@ -224,6 +224,42 @@ for safari_path in (safari_main_dist, safari_pmo_dist, safari_social_dist):
             errors.append(f"unexpanded/invalid domain in {safari_path.name}: {rule[:120]}")
             break
 
+for safari_path in (safari_main_dist, safari_pmo_dist):
+    if not safari_path.exists():
+        continue
+    rules = active_rules(safari_path.read_text(encoding="utf-8"))
+
+    compact_sexual = [
+        rule for rule in rules
+        if "(?:seksi|erotik|ateşli|atesli|sexy|hot)" in rule
+        and "(?:kızlar?|kadınlar?" in rule
+        and ":not(:has-text(" in rule
+    ]
+    if not compact_sexual:
+        errors.append(
+            f"{safari_path.name} missing compact sexual-descriptor rules"
+        )
+
+    compact_leak = [
+        rule for rule in rules
+        if "(?:ifşa|ifsa|sızdırılmış|sızıntı|leak" in rule
+        and "(?:kız|kadın|ünlü|model" in rule
+        and "(?:fotoğraf|fotograf|foto|video" in rule
+        and ":not(:has-text(" in rule
+    ]
+    if not compact_leak:
+        errors.append(
+            f"{safari_path.name} missing compact leak/person/media rules"
+        )
+
+    compact_ai = [
+        rule for rule in rules
+        if "nudify\\s+AI" in rule
+        and ":not(:has-text(" in rule
+    ]
+    if not compact_ai:
+        errors.append(f"{safari_path.name} missing compact AI-undress rules")
+
 if safari_social_dist.exists():
     safari_social_rules = active_rules(
         safari_social_dist.read_text(encoding="utf-8")

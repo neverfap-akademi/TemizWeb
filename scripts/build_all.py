@@ -136,6 +136,264 @@ SAFARI_DOMAIN_RE = re.compile(
     re.I,
 )
 
+SAFARI_MAX_REGEX_CHARS = 900
+
+
+def _regex_group_candidates(pattern: str):
+    """Return regex groups with their immediate top-level alternation points.
+
+    This is a lightweight structural scanner, not a full regex parser. It is
+    sufficient for TemizWeb's generated patterns and respects escapes and
+    character classes.
+    """
+    stack = []
+    groups = []
+    in_class = False
+    escaped = False
+
+    for index, char in enumerate(pattern):
+        if escaped:
+            escaped = False
+            continue
+        if char == "\\":
+            escaped = True
+            continue
+        if in_class:
+            if char == "]":
+                in_class = False
+            continue
+        if char == "[":
+            in_class = True
+            continue
+        if char == "(":
+            stack.append({"start": index, "bars": []})
+            continue
+        if char == "|" and stack:
+            stack[-1]["bars"].append(index)
+            continue
+        if char == ")" and stack:
+            group = stack.pop()
+            group["end"] = index
+            groups.append(group)
+
+    return groups
+
+
+def _split_group_alternatives(pattern: str, group: dict[str, object]):
+    start = int(group["start"])
+    end = int(group["end"])
+    bars = [int(value) for value in group["bars"]]
+    if not bars:
+        return []
+
+    content_start = start + 1
+    prefix = ""
+    if pattern.startswith("?:", content_start):
+        prefix = "?:"
+        content_start += 2
+
+    positions = [content_start, *[bar + 1 for bar in bars]]
+    ends = [*bars, end]
+    alternatives = [pattern[a:b] for a, b in zip(positions, ends)]
+    if any(not item for item in alternatives):
+        return []
+    return prefix, alternatives, start, end
+
+
+def _chunk_alternatives(alternatives: list[str], target_chars: int = 520):
+    chunks: list[list[str]] = []
+    current: list[str] = []
+    size = 0
+    for alternative in alternatives:
+        needed = len(alternative) + (1 if current else 0)
+        if current and size + needed > target_chars:
+            chunks.append(current)
+            current = []
+            size = 0
+        current.append(alternative)
+        size += needed
+    if current:
+        chunks.append(current)
+    return chunks
+
+
+def split_safari_regex(pattern: str) -> list[str]:
+    """Split oversized generated regexes into equivalent short patterns.
+
+    The widest alternation group is split first. Processing repeats until each
+    emitted pattern is short enough for Safari uBOL's Custom Filters parser.
+    """
+    pending = [pattern]
+    output: list[str] = []
+    safety = 0
+
+    while pending:
+        safety += 1
+        if safety > 10000:
+            raise RuntimeError("Safari regex splitting exceeded safety limit")
+
+        current = pending.pop()
+        if len(current) <= SAFARI_MAX_REGEX_CHARS:
+            output.append(current)
+            continue
+
+        choices = []
+        for group in _regex_group_candidates(current):
+            parsed = _split_group_alternatives(current, group)
+            if not parsed:
+                continue
+            prefix, alternatives, start, end = parsed
+            if len(alternatives) < 2:
+                continue
+            chunks = _chunk_alternatives(alternatives)
+            if len(chunks) < 2:
+                continue
+            choices.append((len(alternatives), end - start, parsed))
+
+        if not choices:
+            output.append(current)
+            continue
+
+        _, _, selected = max(choices, key=lambda item: (item[0], item[1]))
+        prefix, alternatives, start, end = selected
+        chunks = _chunk_alternatives(alternatives)
+        if len(chunks) <= 1:
+            output.append(current)
+            continue
+
+        for chunk in reversed(chunks):
+            replacement = "(" + prefix + "|".join(chunk) + ")"
+            pending.append(current[:start] + replacement + current[end + 1:])
+
+    return output
+
+
+SAFARI_BOUNDARY_PREFIX = r"(?:^|[^\p{L}\p{N}_])("
+SAFARI_BOUNDARY_SUFFIX = r")(?=$|[^\p{L}\p{N}_])"
+
+SAFARI_COMPACT_FAMILIES = {
+    "leak": (
+        ("ifşa", "ifsa", "sızdırılmış", "sızıntı", "leak"),
+        r"(?:(?:kız|kadın|ünlü|model|öğrenci|türbanlı|liseli|sevgili|bayan|kiz|kadin|unlu|turbanli).{0,50}(?:ifşa|ifsa|sızdırılmış|sızıntı|leak(?:ed)?).{0,50}(?:fotoğraf|fotograf|foto|video|görüntü|goruntu|kaset|arşiv|arsiv|klip|resim|çıplak|ciplak|nude)|(?:ifşa|ifsa|sızdırılmış|sızıntı|leak(?:ed)?).{0,50}(?:kız|kadın|ünlü|model|öğrenci|türbanlı|liseli|sevgili|bayan|kiz|kadin|unlu|turbanli).{0,50}(?:fotoğraf|fotograf|foto|video|görüntü|goruntu|kaset|arşiv|arsiv|klip|resim|çıplak|ciplak|nude)|(?:fotoğraf|fotograf|foto|video|görüntü|goruntu|kaset|klip|resim).{0,50}(?:kız|kadın|ünlü|model|öğrenci|türbanlı|liseli|sevgili|bayan|kiz|kadin|unlu|turbanli).{0,50}(?:ifşa|ifsa|sızdırılmış|sızıntı|leak(?:ed)?))",
+    ),
+    "sexual_descriptor": (
+        ("seksi", "sexy", "erotik", "hot"),
+        r"(?:(?:seksi|erotik|ateşli|atesli|sexy|hot).{0,25}(?:kızlar?|kadınlar?|modeller?|ünlüler?|kizlar?|kadinlar?|girls?|women|models?)|(?:kızlar?|kadınlar?|modeller?|ünlüler?|kizlar?|kadinlar?|girls?|women|models?).{0,25}(?:seksi|erotik|ateşli|atesli|sexy|hot))",
+    ),
+    "hidden_camera": (
+        (r"gizli\s", "voyeur", "upskirt", r"etek\s*altı"),
+        r"(?:gizli\s+(?:kamera|çekim|cekim).{0,35}(?:çıplak|ciplak|seks|sevişme|sevisme|soyunma|duş|dus|video|görüntü|goruntu)|(?:voyeur|upskirt|etek\s*altı).{0,35}(?:video|foto|fotoğraf|fotograf|görüntü|goruntu|çekim|cekim))",
+    ),
+    "ai_undress": (
+        ("nudify", "undress", r"clothes\s+remover", r"deep[\s-]?nude"),
+        r"(?:AI\s+(?:nude\s+generator|undress|clothes\s+remover)|clothes\s+remover\s+AI|nudify\s+AI|nudifier|deep[\s-]?nude|remove\s+clothes\s+AI|naked\s+AI|kıyafet\s+çıkarma\s+yapay\s+zeka|kiyafet\s+cikarma\s+yapay\s+zeka)",
+    ),
+    "live_cam": (
+        ("camgirl", "webcam", r"live\s+cam", r"canlı\s+soyunma"),
+        r"(?:camgirls?|webcam\s+sex|sex\s+webcams?|live\s+(?:sex\s+cam|cam\s+girls?)|adult\s+cams?|private\s+cam\s+show|canlı\s+(?:soyunma|erotik\s+yayın)|seks\s+kamerası\s+izle|özel\s+show)",
+    ),
+    "suggestive_media": (
+        ("bikini", "lingerie", "dekolte", r"thirst\s*trap", "bikinili"),
+        r"(?:bikini\s+(?:try\s*on|haul|photoshoot)|lingerie\s+(?:try\s*on|haul|photoshoot)|thirst\s*trap|göğüs\s+dekoltesi|gogus\s+dekoltesi|derin\s+dekolte.{0,20}(?:poz|foto|video|görüntü)|(?:bikinili|mayolu|dekolteli|iç\s+çamaşırlı|ic\s+camasirli|üstsüz|ustsuz|sütyensiz|sutyensiz).{0,25}(?:poz|fotoğraf|fotograf|görüntü|video))",
+    ),
+}
+
+
+def safari_compact_bodies(body: str) -> list[str]:
+    """Emit short Safari equivalents for complex risk-family branches."""
+    marker = ":has-text(/"
+    start = body.find(marker)
+    if start < 0:
+        return []
+
+    regex_start = start + len(marker)
+    in_class = False
+    escaped = False
+    regex_end = None
+    index = regex_start
+    while index < len(body):
+        char = body[index]
+        if escaped:
+            escaped = False
+        elif char == "\\":
+            escaped = True
+        elif in_class:
+            if char == "]":
+                in_class = False
+        elif char == "[":
+            in_class = True
+        elif char == "/":
+            probe = index + 1
+            while probe < len(body) and body[probe].isalpha():
+                probe += 1
+            if probe < len(body) and body[probe] == ")":
+                regex_end = index
+                break
+        index += 1
+
+    if regex_end is None:
+        return []
+
+    pattern = body[regex_start:regex_end]
+    prefix = body[:regex_start]
+    suffix = body[regex_end:]
+    compact = []
+
+    for markers, family_pattern in SAFARI_COMPACT_FAMILIES.values():
+        if not any(re.search(marker, pattern, re.I) for marker in markers):
+            continue
+        wrapped = SAFARI_BOUNDARY_PREFIX + family_pattern + SAFARI_BOUNDARY_SUFFIX
+        compact.append(prefix + wrapped + suffix)
+
+    return compact
+
+
+def split_safari_procedural_body(body: str) -> list[str]:
+    """Split only the first :has-text regex; preserve all later guards."""
+    marker = ":has-text(/"
+    start = body.find(marker)
+    if start < 0:
+        return [body]
+
+    regex_start = start + len(marker)
+    in_class = False
+    escaped = False
+    regex_end = None
+    index = regex_start
+
+    while index < len(body):
+        char = body[index]
+        if escaped:
+            escaped = False
+        elif char == "\\":
+            escaped = True
+        elif in_class:
+            if char == "]":
+                in_class = False
+        elif char == "[":
+            in_class = True
+        elif char == "/":
+            probe = index + 1
+            while probe < len(body) and body[probe].isalpha():
+                probe += 1
+            if probe < len(body) and body[probe] == ")":
+                regex_end = index
+                break
+        index += 1
+
+    if regex_end is None:
+        return [body]
+
+    pattern = body[regex_start:regex_end]
+    if len(pattern) <= SAFARI_MAX_REGEX_CHARS:
+        return [body]
+
+    split_patterns = split_safari_regex(pattern)
+    return [
+        body[:regex_start] + short_pattern + body[regex_end:]
+        for short_pattern in split_patterns
+    ]
+
 
 def build_safari_custom_filters(text: str) -> str:
     """Compile normal uBlock rules into Safari uBOL Custom Filters.
@@ -188,11 +446,14 @@ def build_safari_custom_filters(text: str) -> str:
         if (domain, body) in exceptions:
             continue
 
-        safari_rule = f"{domain}##{body}"
-        if safari_rule in seen:
-            continue
-        seen.add(safari_rule)
-        output.append(safari_rule)
+        safari_bodies = split_safari_procedural_body(body)
+        safari_bodies.extend(safari_compact_bodies(body))
+        for safari_body in safari_bodies:
+            safari_rule = f"{domain}##{safari_body}"
+            if safari_rule in seen:
+                continue
+            seen.add(safari_rule)
+            output.append(safari_rule)
 
     header = (
         "! Title: TemizWeb Safari Custom Filters\n"
